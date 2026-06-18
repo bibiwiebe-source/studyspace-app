@@ -46,7 +46,7 @@ const initialRooms: Room[] = [
     building: 'Gebäude A',
     floor: 'Etage 1',
     capacity: 6,
-    equipment: ['Beamer', 'Whiteboard', 'Steckdosen', 'WLAN'],
+    equipment: ['Beamer', 'Whiteboard', 'Steckdosen', 'WLAN', 'USB-C Dock', 'Tageslicht'],
     bookings: [{ start: MORNING_START, end: AFTERNOON_START }],
   },
   {
@@ -55,7 +55,7 @@ const initialRooms: Room[] = [
     building: 'Gebäude B',
     floor: 'Etage 2',
     capacity: 4,
-    equipment: ['Monitor', 'Steckdosen', 'WLAN'],
+    equipment: ['Monitor', 'Steckdosen', 'WLAN', 'HDMI', 'Ergostühle'],
     bookings: [],
   },
   {
@@ -64,7 +64,7 @@ const initialRooms: Room[] = [
     building: 'Bibliothek',
     floor: 'Erdgeschoss',
     capacity: 8,
-    equipment: ['Smartboard', 'Whiteboard', 'Gruppenarbeitstisch', 'WLAN'],
+    equipment: ['Smartboard', 'Whiteboard', 'Gruppenarbeitstisch', 'WLAN', 'Moderationskarten', 'Akustikpaneele'],
     bookings: [{ start: AFTERNOON_START, end: DAY_END }],
   },
   {
@@ -73,7 +73,7 @@ const initialRooms: Room[] = [
     building: 'Gebäude D',
     floor: 'Etage 3',
     capacity: 10,
-    equipment: ['Beamer', 'Lautsprecher', 'Whiteboard', 'WLAN'],
+    equipment: ['Beamer', 'Lautsprecher', 'Whiteboard', 'WLAN', 'Videokonferenz-Set', 'Flipchart'],
     bookings: [{ start: MORNING_START, end: DAY_END }],
   },
   {
@@ -82,7 +82,61 @@ const initialRooms: Room[] = [
     building: 'Bibliothek',
     floor: 'Etage 2',
     capacity: 2,
-    equipment: ['Ruhiger Bereich', 'Steckdosen', 'WLAN'],
+    equipment: ['Ruhiger Bereich', 'Steckdosen', 'WLAN', 'Leselampe', 'Sichtschutz'],
+    bookings: [],
+  },
+  {
+    id: 'e112',
+    name: 'E112',
+    building: 'Gebäude E',
+    floor: 'Etage 1',
+    capacity: 5,
+    equipment: ['Whiteboard', 'WLAN', 'Steckdosen', 'Dokumentenkamera', 'Pinnwand'],
+    bookings: [],
+  },
+  {
+    id: 'f021',
+    name: 'F021',
+    building: 'Gebäude F',
+    floor: 'Erdgeschoss',
+    capacity: 12,
+    equipment: ['Smartboard', 'Beamer', 'Lautsprecher', 'WLAN', 'Konferenztisch', 'Kamera'],
+    bookings: [{ start: AFTERNOON_START, end: DAY_END }],
+  },
+  {
+    id: 'lab3',
+    name: 'Lab-3',
+    building: 'Medienlabor',
+    floor: 'Etage 1',
+    capacity: 6,
+    equipment: ['Mac-Arbeitsplätze', 'Großbildschirm', 'WLAN', 'USB-C Dock', 'Audiointerface'],
+    bookings: [{ start: MORNING_START, end: AFTERNOON_START }],
+  },
+  {
+    id: 'bib05',
+    name: 'Bib-05',
+    building: 'Bibliothek',
+    floor: 'Erdgeschoss',
+    capacity: 3,
+    equipment: ['Ruhiger Bereich', 'WLAN', 'Steckdosen', 'Schreibtischleuchte', 'Whiteboard mobil'],
+    bookings: [],
+  },
+  {
+    id: 'g404',
+    name: 'G404',
+    building: 'Gebäude G',
+    floor: 'Etage 4',
+    capacity: 14,
+    equipment: ['Beamer', 'Smartboard', 'Whiteboard', 'WLAN', 'Hybrid-Meeting', 'Klimaanlage'],
+    bookings: [{ start: MORNING_START, end: DAY_END }],
+  },
+  {
+    id: 'a220',
+    name: 'A220',
+    building: 'Gebäude A',
+    floor: 'Etage 2',
+    capacity: 4,
+    equipment: ['Monitor', 'WLAN', 'Steckdosen', 'Glasboard', 'Telefonbox nah'],
     bookings: [],
   },
 ];
@@ -218,7 +272,7 @@ export default function App() {
       {screen === 'login' && (
         <View style={styles.loginScreen}>
           <View style={styles.brandBlock}>
-            <View style={styles.logoMark}><Text style={styles.logoText}>S</Text></View>
+            <StudyIcon small />
             <Text style={styles.appTitle}>StudySpace</Text>
             <Text style={styles.subtitle}>Finde und buche freie Lernräume auf dem Campus</Text>
           </View>
@@ -365,9 +419,9 @@ export default function App() {
   );
 }
 
-function StudyIcon() {
+function StudyIcon({ small }: { small?: boolean }) {
   return (
-    <View style={styles.studyIcon}>
+    <View style={[styles.studyIcon, small && styles.studyIconSmall]}>
       <View style={styles.iconBuilding}>
         <View style={styles.iconWindowRow}><View style={styles.iconWindow} /><View style={styles.iconWindow} /></View>
         <View style={styles.iconDoor} />
@@ -448,6 +502,7 @@ const colors = {
   greenSoft: '#e8f8f0',
   gray: '#64748b',
   graySoft: '#eef2f7',
+  mint: '#dff8ec',
   red: '#b33a3a',
   redSoft: '#fdecec',
   background: '#f4f7fb',
@@ -466,6 +521,7 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   homeFooter: { alignSelf: 'flex-end', color: colors.muted, fontSize: 12, fontWeight: '700', textAlign: 'right' },
   studyIcon: { width: 112, height: 112, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 24, backgroundColor: colors.navy, shadowColor: colors.navy, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.2, shadowRadius: 18, elevation: 6 },
+  studyIconSmall: { transform: [{ scale: 0.78 }], marginBottom: 10 },
   iconBuilding: { width: 52, height: 58, borderTopLeftRadius: 12, borderTopRightRadius: 12, alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, backgroundColor: '#ffffff' },
   iconWindowRow: { flexDirection: 'row', gap: 7 },
   iconWindow: { width: 10, height: 10, borderRadius: 3, backgroundColor: colors.green },
@@ -490,9 +546,9 @@ const styles = StyleSheet.create({
   loadingSubtitle: { maxWidth: 310, marginTop: 10, color: colors.muted, fontSize: 16, lineHeight: 23, textAlign: 'center' },
   uniIconRail: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 42, marginBottom: 34 },
   uniIconCard: { width: 92, minHeight: 108, borderRadius: 22, alignItems: 'center', justifyContent: 'center', padding: 12, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, shadowColor: '#1b2a41', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.08, shadowRadius: 16, elevation: 3 },
-  uniIconCardFeatured: { backgroundColor: colors.navy, borderColor: colors.navy },
+  uniIconCardFeatured: { backgroundColor: colors.mint, borderColor: '#b7efd3' },
   uniIconLabel: { marginTop: 10, color: colors.navySoft, fontSize: 12, fontWeight: '900' },
-  uniIconLabelFeatured: { color: '#ffffff' },
+  uniIconLabelFeatured: { color: colors.green },
   bookIcon: { flexDirection: 'row', gap: 3 },
   bookPage: { width: 18, height: 30, borderRadius: 5, borderWidth: 2, borderColor: colors.green, backgroundColor: '#ffffff' },
   pencilIcon: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '-24deg' }] },
