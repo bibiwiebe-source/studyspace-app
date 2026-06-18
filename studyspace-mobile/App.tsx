@@ -14,6 +14,16 @@ import {
 type Screen = 'login' | 'rooms' | 'detail' | 'success';
 type RoomStatus = 'free' | 'current' | 'full';
 
+type BookingOptionId = 'morning' | 'afternoon' | 'fullDay';
+
+type BookingOption = {
+  id: BookingOptionId;
+  title: string;
+  subtitle: string;
+  start: number;
+  end: number;
+};
+
 type Booking = {
   start: number;
   end: number;
@@ -29,11 +39,34 @@ type Room = {
   bookings: Booking[];
 };
 
-const OPEN_MINUTES = 8 * 60;
-const CLOSE_MINUTES = 18 * 60;
-const SLOT_MINUTES = 30;
+const MORNING_START = 8 * 60;
+const AFTERNOON_START = 13 * 60;
+const DAY_END = 18 * 60;
 const CURRENT_TIME_MINUTES = 10 * 60 + 30;
-const durationOptions = [30, 60, 90, 120];
+
+const bookingOptions: BookingOption[] = [
+  {
+    id: 'morning',
+    title: 'Vormittag',
+    subtitle: '08:00 - 13:00 Uhr',
+    start: MORNING_START,
+    end: AFTERNOON_START,
+  },
+  {
+    id: 'afternoon',
+    title: 'Nachmittag',
+    subtitle: '13:00 - 18:00 Uhr',
+    start: AFTERNOON_START,
+    end: DAY_END,
+  },
+  {
+    id: 'fullDay',
+    title: 'Ganzer Tag',
+    subtitle: '08:00 - 18:00 Uhr',
+    start: MORNING_START,
+    end: DAY_END,
+  },
+];
 
 const initialRooms: Room[] = [
   {
@@ -43,10 +76,7 @@ const initialRooms: Room[] = [
     floor: 'Etage 1',
     capacity: 6,
     equipment: ['Beamer', 'Whiteboard', 'Steckdosen', 'WLAN'],
-    bookings: [
-      { start: 10 * 60, end: 11 * 60 },
-      { start: 15 * 60 + 30, end: 16 * 60 },
-    ],
+    bookings: [{ start: MORNING_START, end: AFTERNOON_START }],
   },
   {
     id: 'b204',
@@ -64,10 +94,7 @@ const initialRooms: Room[] = [
     floor: 'Erdgeschoss',
     capacity: 8,
     equipment: ['Smartboard', 'Whiteboard', 'Gruppenarbeitstisch', 'WLAN'],
-    bookings: [
-      { start: 9 * 60, end: 10 * 60 + 30 },
-      { start: 13 * 60, end: 14 * 60 },
-    ],
+    bookings: [{ start: AFTERNOON_START, end: DAY_END }],
   },
   {
     id: 'd310',
@@ -76,7 +103,7 @@ const initialRooms: Room[] = [
     floor: 'Etage 3',
     capacity: 10,
     equipment: ['Beamer', 'Lautsprecher', 'Whiteboard', 'WLAN'],
-    bookings: [{ start: OPEN_MINUTES, end: CLOSE_MINUTES }],
+    bookings: [{ start: MORNING_START, end: DAY_END }],
   },
   {
     id: 'bib22',
@@ -85,14 +112,9 @@ const initialRooms: Room[] = [
     floor: 'Etage 2',
     capacity: 2,
     equipment: ['Ruhiger Bereich', 'Steckdosen', 'WLAN'],
-    bookings: [{ start: 12 * 60, end: 13 * 60 }],
+    bookings: [],
   },
 ];
-
-const slotStarts = Array.from(
-  { length: (CLOSE_MINUTES - OPEN_MINUTES) / SLOT_MINUTES },
-  (_, index) => OPEN_MINUTES + index * SLOT_MINUTES,
-);
 
 const formatTime = (minutes: number) => {
   const hour = Math.floor(minutes / 60);
@@ -100,95 +122,84 @@ const formatTime = (minutes: number) => {
   return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
 };
 
-const formatDuration = (minutes: number) =>
-  minutes < 60 ? '30 Min' : `${minutes / 60} Std${minutes > 60 ? '.' : ''}`;
-
 const hasOverlap = (bookings: Booking[], start: number, end: number) =>
   bookings.some((booking) => start < booking.end && end > booking.start);
 
-const getAvailableStarts = (room: Room, duration: number) =>
-  slotStarts.filter(
-    (start) =>
-      start + duration <= CLOSE_MINUTES &&
-      !hasOverlap(room.bookings, start, start + duration),
-  );
+const isOptionAvailable = (room: Room, option: BookingOption) =>
+  !hasOverlap(room.bookings, option.start, option.end);
+
+const getAvailableOptions = (room: Room) =>
+  bookingOptions.filter((option) => isOptionAvailable(room, option));
 
 const getRoomStatus = (room: Room): RoomStatus => {
-  const isFull = slotStarts.every((start) =>
-    hasOverlap(room.bookings, start, start + SLOT_MINUTES),
-  );
+  const morningBooked = hasOverlap(room.bookings, MORNING_START, AFTERNOON_START);
+  const afternoonBooked = hasOverlap(room.bookings, AFTERNOON_START, DAY_END);
+  const currentBooked = hasOverlap(room.bookings, CURRENT_TIME_MINUTES, CURRENT_TIME_MINUTES + 1);
 
-  if (isFull) {
+  if (morningBooked && afternoonBooked) {
     return 'full';
   }
 
-  if (hasOverlap(room.bookings, CURRENT_TIME_MINUTES, CURRENT_TIME_MINUTES + SLOT_MINUTES)) {
+  if (currentBooked) {
     return 'current';
   }
 
   return 'free';
 };
 
-const getNextAvailableText = (room: Room) => {
-  const nextStart = getAvailableStarts(room, SLOT_MINUTES).find(
-    (start) => start >= CURRENT_TIME_MINUTES,
-  );
+const getAvailabilityText = (room: Room) => {
+  const available = getAvailableOptions(room);
 
-  if (nextStart) {
-    return `Nächster Slot ${formatTime(nextStart)} Uhr`;
+  if (available.length === 0) {
+    return 'Heute vollständig ausgebucht';
   }
 
-  return 'Heute kein freier Slot mehr';
+  if (available.length === 3) {
+    return 'Vormittag, Nachmittag oder ganztags buchbar';
+  }
+
+  return `Noch buchbar: ${available.map((option) => option.title).join(', ')}`;
 };
+
+const findOptionByBooking = (booking: Booking | null) =>
+  bookingOptions.find(
+    (option) => booking && option.start === booking.start && option.end === booking.end,
+  );
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('login');
   const [rooms, setRooms] = useState<Room[]>(initialRooms);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+  const [selectedOptionId, setSelectedOptionId] = useState<BookingOptionId | null>(null);
   const [bookedRoom, setBookedRoom] = useState<Room | null>(null);
   const [bookedSlot, setBookedSlot] = useState<Booking | null>(null);
-  const [selectedDuration, setSelectedDuration] = useState(60);
-  const [selectedStart, setSelectedStart] = useState<number | null>(null);
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
 
   const selectedRoom = rooms.find((room) => room.id === selectedRoomId) ?? null;
-  const availableStarts = selectedRoom
-    ? getAvailableStarts(selectedRoom, selectedDuration)
-    : [];
+  const selectedOption =
+    bookingOptions.find((option) => option.id === selectedOptionId) ?? null;
+  const availableOptions = selectedRoom ? getAvailableOptions(selectedRoom) : [];
   const freeRoomCount = rooms.filter((room) => getRoomStatus(room) === 'free').length;
 
   const openRoom = (room: Room) => {
-    const defaultDuration = 60;
-    const firstStart = getAvailableStarts(room, defaultDuration)[0] ?? null;
     setSelectedRoomId(room.id);
-    setSelectedDuration(defaultDuration);
-    setSelectedStart(firstStart);
+    setSelectedOptionId(getAvailableOptions(room)[0]?.id ?? null);
     setCurrentScreen('detail');
   };
 
-  const changeDuration = (duration: number) => {
-    if (!selectedRoom) {
-      return;
-    }
-
-    const starts = getAvailableStarts(selectedRoom, duration);
-    setSelectedDuration(duration);
-    setSelectedStart(starts.includes(selectedStart ?? -1) ? selectedStart : starts[0] ?? null);
-  };
-
   const bookRoom = () => {
-    if (!selectedRoom || selectedStart === null) {
-      Alert.alert('Slot auswählen', 'Bitte wähle zuerst einen verfügbaren Zeitslot.');
+    if (!selectedRoom || !selectedOption) {
+      Alert.alert('Zeitraum auswählen', 'Bitte wähle zuerst einen freien Zeitraum.');
       return;
     }
 
-    const booking = { start: selectedStart, end: selectedStart + selectedDuration };
-
-    if (hasOverlap(selectedRoom.bookings, booking.start, booking.end)) {
+    if (!isOptionAvailable(selectedRoom, selectedOption)) {
       Alert.alert('Nicht verfügbar', 'Dieser Zeitraum ist bereits belegt.');
       return;
     }
+
+    const booking = { start: selectedOption.start, end: selectedOption.end };
 
     setRooms((currentRooms) =>
       currentRooms.map((room) =>
@@ -204,6 +215,7 @@ export default function App() {
 
   const goToRooms = () => {
     setSelectedRoomId(null);
+    setSelectedOptionId(null);
     setCurrentScreen('rooms');
   };
 
@@ -268,7 +280,7 @@ export default function App() {
             <View style={[styles.legendDot, styles.legendFree]} />
             <Text style={styles.legendText}>frei</Text>
             <View style={[styles.legendDot, styles.legendCurrent]} />
-            <Text style={styles.legendText}>jetzt belegt</Text>
+            <Text style={styles.legendText}>gerade belegt</Text>
             <View style={[styles.legendDot, styles.legendFull]} />
             <Text style={styles.legendText}>ausgebucht</Text>
           </View>
@@ -280,7 +292,7 @@ export default function App() {
                 status === 'free'
                   ? 'Frei'
                   : status === 'current'
-                    ? 'Jetzt belegt'
+                    ? 'Gerade belegt'
                     : 'Heute ausgebucht';
 
               return (
@@ -324,8 +336,8 @@ export default function App() {
                     </View>
                   </View>
 
-                  <Text style={styles.cardMeta}>{room.capacity} Plätze · 30-Minuten-Slots</Text>
-                  <Text style={styles.availabilityText}>{getNextAvailableText(room)}</Text>
+                  <Text style={styles.cardMeta}>{room.capacity} Plätze · halb- oder ganztags</Text>
+                  <Text style={styles.availabilityText}>{getAvailabilityText(room)}</Text>
                   <View style={styles.chipRow}>
                     {room.equipment.slice(0, 3).map((item) => (
                       <View key={item} style={styles.smallChip}>
@@ -370,7 +382,7 @@ export default function App() {
                 {getRoomStatus(selectedRoom) === 'free'
                   ? 'Jetzt frei'
                   : getRoomStatus(selectedRoom) === 'current'
-                    ? 'Jetzt belegt'
+                    ? 'Gerade belegt'
                     : 'Heute ausgebucht'}
               </Text>
             </View>
@@ -392,58 +404,65 @@ export default function App() {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Dauer wählen</Text>
-            <View style={styles.durationGrid}>
-              {durationOptions.map((duration) => (
-                <TouchableOpacity
-                  key={duration}
-                  activeOpacity={0.85}
-                  style={[
-                    styles.durationOption,
-                    selectedDuration === duration && styles.durationOptionActive,
-                  ]}
-                  onPress={() => changeDuration(duration)}
-                >
-                  <Text
-                    style={[
-                      styles.durationOptionText,
-                      selectedDuration === duration && styles.durationOptionTextActive,
-                    ]}
-                  >
-                    {formatDuration(duration)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Startzeit</Text>
-            {availableStarts.length === 0 ? (
+            <Text style={styles.sectionTitle}>Zeitraum wählen</Text>
+            {availableOptions.length === 0 ? (
               <View style={styles.emptySlots}>
                 <Text style={styles.emptySlotsText}>
-                  Für diese Dauer ist heute kein Slot mehr frei.
+                  Dieser Raum ist heute vollständig ausgebucht.
                 </Text>
               </View>
             ) : (
-              <View style={styles.slotGrid}>
-                {availableStarts.map((start) => (
-                  <TouchableOpacity
-                    key={start}
-                    activeOpacity={0.85}
-                    style={[styles.slotChip, selectedStart === start && styles.slotChipActive]}
-                    onPress={() => setSelectedStart(start)}
-                  >
-                    <Text
+              <View style={styles.optionList}>
+                {bookingOptions.map((option) => {
+                  const available = isOptionAvailable(selectedRoom, option);
+                  const active = selectedOptionId === option.id;
+
+                  return (
+                    <TouchableOpacity
+                      key={option.id}
+                      activeOpacity={available ? 0.85 : 1}
+                      disabled={!available}
                       style={[
-                        styles.slotChipText,
-                        selectedStart === start && styles.slotChipTextActive,
+                        styles.bookingOption,
+                        active && styles.bookingOptionActive,
+                        !available && styles.bookingOptionDisabled,
                       ]}
+                      onPress={() => setSelectedOptionId(option.id)}
                     >
-                      {formatTime(start)}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                      <View style={styles.optionTextBlock}>
+                        <Text
+                          style={[
+                            styles.bookingOptionTitle,
+                            active && styles.bookingOptionTitleActive,
+                            !available && styles.bookingOptionTextDisabled,
+                          ]}
+                        >
+                          {option.title}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.bookingOptionSubtitle,
+                            active && styles.bookingOptionSubtitleActive,
+                            !available && styles.bookingOptionTextDisabled,
+                          ]}
+                        >
+                          {option.subtitle}
+                        </Text>
+                      </View>
+                      <View style={[styles.optionPill, active && styles.optionPillActive]}>
+                        <Text
+                          style={[
+                            styles.optionPillText,
+                            active && styles.optionPillTextActive,
+                            !available && styles.bookingOptionTextDisabled,
+                          ]}
+                        >
+                          {available ? 'frei' : 'belegt'}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             )}
           </View>
@@ -461,7 +480,7 @@ export default function App() {
 
           <TouchableOpacity
             activeOpacity={0.85}
-            style={[styles.primaryButton, availableStarts.length === 0 && styles.disabledButton]}
+            style={[styles.primaryButton, availableOptions.length === 0 && styles.disabledButton]}
             onPress={bookRoom}
           >
             <Text style={styles.primaryButtonText}>Raum buchen</Text>
@@ -476,8 +495,8 @@ export default function App() {
           </View>
           <Text style={styles.successTitle}>Deine Buchung wurde bestätigt</Text>
           <Text style={styles.successSubtitle}>
-            {bookedRoom.name} ist von {formatTime(bookedSlot.start)} bis{' '}
-            {formatTime(bookedSlot.end)} Uhr für dich reserviert.
+            {bookedRoom.name} ist {findOptionByBooking(bookedSlot)?.title.toLowerCase()} von{' '}
+            {formatTime(bookedSlot.start)} bis {formatTime(bookedSlot.end)} Uhr für dich reserviert.
           </Text>
           <TouchableOpacity
             activeOpacity={0.85}
@@ -497,8 +516,8 @@ const colors = {
   navySoft: '#14345c',
   green: '#19a66a',
   greenSoft: '#e8f8f0',
-  amber: '#c98213',
-  amberSoft: '#fff5df',
+  gray: '#64748b',
+  graySoft: '#eef2f7',
   red: '#b33a3a',
   redSoft: '#fdecec',
   background: '#f4f7fb',
@@ -630,7 +649,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.green,
   },
   legendCurrent: {
-    backgroundColor: colors.amber,
+    backgroundColor: colors.gray,
   },
   legendFull: {
     backgroundColor: colors.red,
@@ -657,8 +676,9 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   currentCard: {
-    borderColor: '#f0d59d',
-    backgroundColor: '#fffaf0',
+    borderColor: '#d7dee9',
+    backgroundColor: '#f8fafc',
+    opacity: 0.78,
   },
   fullCard: {
     borderColor: '#f2c4c4',
@@ -696,7 +716,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.greenSoft,
   },
   currentBadge: {
-    backgroundColor: colors.amberSoft,
+    backgroundColor: colors.graySoft,
   },
   fullBadge: {
     backgroundColor: colors.redSoft,
@@ -709,7 +729,7 @@ const styles = StyleSheet.create({
     color: colors.green,
   },
   currentText: {
-    color: colors.amber,
+    color: colors.gray,
   },
   fullText: {
     color: colors.red,
@@ -806,57 +826,67 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '800',
   },
-  durationGrid: {
-    flexDirection: 'row',
-    gap: 10,
+  optionList: {
+    gap: 12,
   },
-  durationOption: {
-    flex: 1,
-    minHeight: 52,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+  bookingOption: {
+    minHeight: 76,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: colors.border,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
     backgroundColor: colors.card,
   },
-  durationOptionActive: {
-    borderColor: colors.navy,
-    backgroundColor: colors.navy,
+  bookingOptionActive: {
+    borderColor: colors.green,
+    backgroundColor: colors.greenSoft,
   },
-  durationOptionText: {
+  bookingOptionDisabled: {
+    backgroundColor: '#f1f5f9',
+    opacity: 0.62,
+  },
+  optionTextBlock: {
+    flex: 1,
+  },
+  bookingOptionTitle: {
     color: colors.navy,
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: '800',
   },
-  durationOptionTextActive: {
-    color: '#ffffff',
+  bookingOptionSubtitle: {
+    marginTop: 4,
+    color: colors.muted,
+    fontSize: 14,
+    fontWeight: '700',
   },
-  slotGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
+  bookingOptionTitleActive: {
+    color: colors.green,
   },
-  slotChip: {
-    minWidth: 72,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: 13,
-    paddingVertical: 11,
-    alignItems: 'center',
-    backgroundColor: colors.card,
+  bookingOptionSubtitleActive: {
+    color: '#167a50',
   },
-  slotChipActive: {
-    borderColor: colors.green,
+  bookingOptionTextDisabled: {
+    color: '#8a94a6',
+  },
+  optionPill: {
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    backgroundColor: '#eef3f8',
+  },
+  optionPillActive: {
     backgroundColor: colors.green,
   },
-  slotChipText: {
-    color: colors.navy,
-    fontSize: 14,
+  optionPillText: {
+    color: colors.navySoft,
+    fontSize: 12,
     fontWeight: '800',
   },
-  slotChipTextActive: {
+  optionPillTextActive: {
     color: '#ffffff',
   },
   emptySlots: {
