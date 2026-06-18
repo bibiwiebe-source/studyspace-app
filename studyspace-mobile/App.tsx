@@ -1,7 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   Alert,
+  Animated,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -11,7 +12,7 @@ import {
   View,
 } from 'react-native';
 
-type Screen = 'login' | 'rooms' | 'detail' | 'success';
+type Screen = 'home' | 'login' | 'rooms' | 'detail' | 'success';
 type RoomStatus = 'free' | 'current' | 'full';
 
 type BookingOptionId = 'morning' | 'afternoon' | 'fullDay';
@@ -167,14 +168,16 @@ const findOptionByBooking = (booking: Booking | null) =>
   );
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('login');
+  const [currentScreen, setCurrentScreen] = useState<Screen>('home');
   const [rooms, setRooms] = useState<Room[]>(initialRooms);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [selectedOptionId, setSelectedOptionId] = useState<BookingOptionId | null>(null);
   const [bookedRoom, setBookedRoom] = useState<Room | null>(null);
   const [bookedSlot, setBookedSlot] = useState<Booking | null>(null);
+  const [isLoadingSpaces, setIsLoadingSpaces] = useState(false);
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
+  const doorProgress = useRef(new Animated.Value(0)).current;
 
   const selectedRoom = rooms.find((room) => room.id === selectedRoomId) ?? null;
   const selectedOption =
@@ -186,6 +189,31 @@ export default function App() {
     setSelectedRoomId(room.id);
     setSelectedOptionId(getAvailableOptions(room)[0]?.id ?? null);
     setCurrentScreen('detail');
+  };
+
+  const loadStudySpaces = () => {
+    if (isLoadingSpaces) {
+      return;
+    }
+
+    setIsLoadingSpaces(true);
+    doorProgress.setValue(0);
+
+    Animated.sequence([
+      Animated.timing(doorProgress, {
+        toValue: 0.22,
+        duration: 260,
+        useNativeDriver: true,
+      }),
+      Animated.timing(doorProgress, {
+        toValue: 1,
+        duration: 880,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setIsLoadingSpaces(false);
+      setCurrentScreen('login');
+    });
   };
 
   const bookRoom = () => {
@@ -222,6 +250,129 @@ export default function App() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="dark" />
+
+      {currentScreen === 'home' && (
+        <View style={styles.homeScreen}>
+          <View style={styles.homeContent}>
+            <View style={styles.studyIcon}>
+              <View style={styles.iconBuilding}>
+                <View style={styles.iconWindowRow}>
+                  <View style={styles.iconWindow} />
+                  <View style={styles.iconWindow} />
+                </View>
+                <View style={styles.iconDoor} />
+              </View>
+              <View style={styles.iconBook}>
+                <View style={styles.iconBookLine} />
+                <View style={styles.iconBookLineShort} />
+              </View>
+            </View>
+
+            <Text style={styles.homeTitle}>StudySpace</Text>
+            <Text style={styles.homeSubtitle}>
+              Finde deinen freien Lernraum auf dem Campus.
+            </Text>
+
+            <View style={styles.doorStage}>
+              <View style={styles.doorFrame}>
+                <Animated.View
+                  style={[
+                    styles.doorPanel,
+                    styles.doorLeft,
+                    {
+                      transform: [
+                        {
+                          translateX: doorProgress.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, -36],
+                          }),
+                        },
+                        {
+                          rotateY: doorProgress.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ['0deg', '-34deg'],
+                          }),
+                        },
+                      ],
+                    },
+                  ]}
+                />
+                <Animated.View
+                  style={[
+                    styles.doorPanel,
+                    styles.doorRight,
+                    {
+                      transform: [
+                        {
+                          translateX: doorProgress.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, 36],
+                          }),
+                        },
+                        {
+                          rotateY: doorProgress.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ['0deg', '34deg'],
+                          }),
+                        },
+                      ],
+                    },
+                  ]}
+                />
+                <Animated.View
+                  style={[
+                    styles.openGlow,
+                    {
+                      opacity: doorProgress.interpolate({
+                        inputRange: [0, 0.45, 1],
+                        outputRange: [0, 0.18, 0.8],
+                      }),
+                      transform: [
+                        {
+                          scale: doorProgress.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0.72, 1.08],
+                          }),
+                        },
+                      ],
+                    },
+                  ]}
+                />
+              </View>
+
+              <View style={styles.loadingTrack}>
+                <Animated.View
+                  style={[
+                    styles.loadingFill,
+                    {
+                      transform: [
+                        {
+                          scaleX: doorProgress.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0.08, 1],
+                          }),
+                        },
+                      ],
+                    },
+                  ]}
+                />
+              </View>
+            </View>
+
+            <TouchableOpacity
+              activeOpacity={0.86}
+              style={[styles.primaryButton, styles.homeButton]}
+              onPress={loadStudySpaces}
+            >
+              <Text style={styles.primaryButtonText}>
+                {isLoadingSpaces ? 'StudySpaces werden geladen...' : 'StudySpaces laden'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.homeFooter}>Entwickelt in Kooperation mit HSNR FB03</Text>
+        </View>
+      )}
 
       {currentScreen === 'login' && (
         <View style={styles.loginScreen}>
@@ -531,6 +682,160 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  homeScreen: {
+    flex: 1,
+    padding: 24,
+    backgroundColor: colors.background,
+  },
+  homeContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  studyIcon: {
+    width: 112,
+    height: 112,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+    backgroundColor: colors.navy,
+    shadowColor: colors.navy,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.2,
+    shadowRadius: 18,
+    elevation: 6,
+  },
+  iconBuilding: {
+    width: 52,
+    height: 58,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 12,
+    backgroundColor: '#ffffff',
+  },
+  iconWindowRow: {
+    flexDirection: 'row',
+    gap: 7,
+  },
+  iconWindow: {
+    width: 10,
+    height: 10,
+    borderRadius: 3,
+    backgroundColor: colors.green,
+  },
+  iconDoor: {
+    width: 18,
+    height: 24,
+    borderTopLeftRadius: 7,
+    borderTopRightRadius: 7,
+    backgroundColor: colors.navy,
+  },
+  iconBook: {
+    position: 'absolute',
+    right: 22,
+    bottom: 20,
+    width: 34,
+    height: 22,
+    borderRadius: 7,
+    paddingHorizontal: 7,
+    paddingVertical: 5,
+    backgroundColor: colors.green,
+  },
+  iconBookLine: {
+    height: 3,
+    borderRadius: 99,
+    marginBottom: 5,
+    backgroundColor: '#ffffff',
+  },
+  iconBookLineShort: {
+    width: 13,
+    height: 3,
+    borderRadius: 99,
+    backgroundColor: '#ffffff',
+  },
+  homeTitle: {
+    color: colors.navy,
+    fontSize: 40,
+    fontWeight: '900',
+    letterSpacing: 0,
+  },
+  homeSubtitle: {
+    maxWidth: 300,
+    marginTop: 10,
+    color: colors.muted,
+    fontSize: 17,
+    lineHeight: 24,
+    textAlign: 'center',
+  },
+  doorStage: {
+    alignItems: 'center',
+    marginTop: 34,
+    marginBottom: 20,
+  },
+  doorFrame: {
+    width: 128,
+    height: 110,
+    borderRadius: 26,
+    overflow: 'hidden',
+    borderWidth: 5,
+    borderColor: colors.navy,
+    backgroundColor: '#dff8ec',
+  },
+  doorPanel: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 59,
+    backgroundColor: colors.navy,
+  },
+  doorLeft: {
+    left: 0,
+    borderRightWidth: 1,
+    borderRightColor: '#25486f',
+  },
+  doorRight: {
+    right: 0,
+    borderLeftWidth: 1,
+    borderLeftColor: '#25486f',
+  },
+  openGlow: {
+    position: 'absolute',
+    left: 29,
+    top: 22,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: colors.green,
+  },
+  loadingTrack: {
+    width: 158,
+    height: 9,
+    borderRadius: 99,
+    overflow: 'hidden',
+    marginTop: 16,
+    backgroundColor: '#dde6f1',
+  },
+  loadingFill: {
+    width: 158,
+    height: 9,
+    borderRadius: 99,
+    backgroundColor: colors.green,
+    transformOrigin: 'left',
+  },
+  homeButton: {
+    width: '100%',
+    maxWidth: 320,
+  },
+  homeFooter: {
+    alignSelf: 'flex-end',
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: '700',
+    textAlign: 'right',
   },
   loginScreen: {
     flex: 1,
