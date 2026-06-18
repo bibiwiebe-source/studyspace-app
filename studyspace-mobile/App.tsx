@@ -12,6 +12,12 @@ import {
 } from 'react-native';
 
 type Screen = 'login' | 'rooms' | 'detail' | 'success';
+type RoomStatus = 'free' | 'current' | 'full';
+
+type Booking = {
+  start: number;
+  end: number;
+};
 
 type Room = {
   id: string;
@@ -19,21 +25,28 @@ type Room = {
   building: string;
   floor: string;
   capacity: number;
-  available: boolean;
   equipment: string[];
-  availableTime: string;
+  bookings: Booking[];
 };
 
-const rooms: Room[] = [
+const OPEN_MINUTES = 8 * 60;
+const CLOSE_MINUTES = 18 * 60;
+const SLOT_MINUTES = 30;
+const CURRENT_TIME_MINUTES = 10 * 60 + 30;
+const durationOptions = [30, 60, 90, 120];
+
+const initialRooms: Room[] = [
   {
     id: 'a101',
     name: 'A101',
     building: 'Gebäude A',
     floor: 'Etage 1',
     capacity: 6,
-    available: true,
     equipment: ['Beamer', 'Whiteboard', 'Steckdosen', 'WLAN'],
-    availableTime: 'Heute, 14:00 - 18:00 Uhr',
+    bookings: [
+      { start: 10 * 60, end: 11 * 60 },
+      { start: 15 * 60 + 30, end: 16 * 60 },
+    ],
   },
   {
     id: 'b204',
@@ -41,9 +54,8 @@ const rooms: Room[] = [
     building: 'Gebäude B',
     floor: 'Etage 2',
     capacity: 4,
-    available: true,
     equipment: ['Monitor', 'Steckdosen', 'WLAN'],
-    availableTime: 'Heute, 12:30 - 16:00 Uhr',
+    bookings: [],
   },
   {
     id: 'c015',
@@ -51,9 +63,11 @@ const rooms: Room[] = [
     building: 'Bibliothek',
     floor: 'Erdgeschoss',
     capacity: 8,
-    available: true,
     equipment: ['Smartboard', 'Whiteboard', 'Gruppenarbeitstisch', 'WLAN'],
-    availableTime: 'Heute, 15:00 - 20:00 Uhr',
+    bookings: [
+      { start: 9 * 60, end: 10 * 60 + 30 },
+      { start: 13 * 60, end: 14 * 60 },
+    ],
   },
   {
     id: 'd310',
@@ -61,9 +75,8 @@ const rooms: Room[] = [
     building: 'Gebäude D',
     floor: 'Etage 3',
     capacity: 10,
-    available: false,
     equipment: ['Beamer', 'Lautsprecher', 'Whiteboard', 'WLAN'],
-    availableTime: 'Belegt bis 17:30 Uhr',
+    bookings: [{ start: OPEN_MINUTES, end: CLOSE_MINUTES }],
   },
   {
     id: 'bib22',
@@ -71,38 +84,126 @@ const rooms: Room[] = [
     building: 'Bibliothek',
     floor: 'Etage 2',
     capacity: 2,
-    available: true,
     equipment: ['Ruhiger Bereich', 'Steckdosen', 'WLAN'],
-    availableTime: 'Heute, 10:00 - 19:00 Uhr',
+    bookings: [{ start: 12 * 60, end: 13 * 60 }],
   },
 ];
 
+const slotStarts = Array.from(
+  { length: (CLOSE_MINUTES - OPEN_MINUTES) / SLOT_MINUTES },
+  (_, index) => OPEN_MINUTES + index * SLOT_MINUTES,
+);
+
+const formatTime = (minutes: number) => {
+  const hour = Math.floor(minutes / 60);
+  const minute = minutes % 60;
+  return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+};
+
+const formatDuration = (minutes: number) =>
+  minutes < 60 ? '30 Min' : `${minutes / 60} Std${minutes > 60 ? '.' : ''}`;
+
+const hasOverlap = (bookings: Booking[], start: number, end: number) =>
+  bookings.some((booking) => start < booking.end && end > booking.start);
+
+const getAvailableStarts = (room: Room, duration: number) =>
+  slotStarts.filter(
+    (start) =>
+      start + duration <= CLOSE_MINUTES &&
+      !hasOverlap(room.bookings, start, start + duration),
+  );
+
+const getRoomStatus = (room: Room): RoomStatus => {
+  const isFull = slotStarts.every((start) =>
+    hasOverlap(room.bookings, start, start + SLOT_MINUTES),
+  );
+
+  if (isFull) {
+    return 'full';
+  }
+
+  if (hasOverlap(room.bookings, CURRENT_TIME_MINUTES, CURRENT_TIME_MINUTES + SLOT_MINUTES)) {
+    return 'current';
+  }
+
+  return 'free';
+};
+
+const getNextAvailableText = (room: Room) => {
+  const nextStart = getAvailableStarts(room, SLOT_MINUTES).find(
+    (start) => start >= CURRENT_TIME_MINUTES,
+  );
+
+  if (nextStart) {
+    return `Nächster Slot ${formatTime(nextStart)} Uhr`;
+  }
+
+  return 'Heute kein freier Slot mehr';
+};
+
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('login');
-  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+  const [rooms, setRooms] = useState<Room[]>(initialRooms);
+  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [bookedRoom, setBookedRoom] = useState<Room | null>(null);
+  const [bookedSlot, setBookedSlot] = useState<Booking | null>(null);
+  const [selectedDuration, setSelectedDuration] = useState(60);
+  const [selectedStart, setSelectedStart] = useState<number | null>(null);
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
 
-  const freeRoomCount = rooms.filter((room) => room.available).length;
+  const selectedRoom = rooms.find((room) => room.id === selectedRoomId) ?? null;
+  const availableStarts = selectedRoom
+    ? getAvailableStarts(selectedRoom, selectedDuration)
+    : [];
+  const freeRoomCount = rooms.filter((room) => getRoomStatus(room) === 'free').length;
 
-  const showRoom = (room: Room) => {
-    setSelectedRoom(room);
+  const openRoom = (room: Room) => {
+    const defaultDuration = 60;
+    const firstStart = getAvailableStarts(room, defaultDuration)[0] ?? null;
+    setSelectedRoomId(room.id);
+    setSelectedDuration(defaultDuration);
+    setSelectedStart(firstStart);
     setCurrentScreen('detail');
   };
 
-  const bookRoom = () => {
-    if (!selectedRoom || !selectedRoom.available) {
-      Alert.alert('Nicht verfügbar', 'Dieser Raum ist aktuell belegt.');
+  const changeDuration = (duration: number) => {
+    if (!selectedRoom) {
       return;
     }
 
+    const starts = getAvailableStarts(selectedRoom, duration);
+    setSelectedDuration(duration);
+    setSelectedStart(starts.includes(selectedStart ?? -1) ? selectedStart : starts[0] ?? null);
+  };
+
+  const bookRoom = () => {
+    if (!selectedRoom || selectedStart === null) {
+      Alert.alert('Slot auswählen', 'Bitte wähle zuerst einen verfügbaren Zeitslot.');
+      return;
+    }
+
+    const booking = { start: selectedStart, end: selectedStart + selectedDuration };
+
+    if (hasOverlap(selectedRoom.bookings, booking.start, booking.end)) {
+      Alert.alert('Nicht verfügbar', 'Dieser Zeitraum ist bereits belegt.');
+      return;
+    }
+
+    setRooms((currentRooms) =>
+      currentRooms.map((room) =>
+        room.id === selectedRoom.id
+          ? { ...room, bookings: [...room.bookings, booking] }
+          : room,
+      ),
+    );
     setBookedRoom(selectedRoom);
+    setBookedSlot(booking);
     setCurrentScreen('success');
   };
 
-  const backToRooms = () => {
-    setSelectedRoom(null);
+  const goToRooms = () => {
+    setSelectedRoomId(null);
     setCurrentScreen('rooms');
   };
 
@@ -158,45 +259,83 @@ export default function App() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
-            <Text style={styles.kicker}>Campus heute</Text>
+            <Text style={styles.kicker}>Campus heute · Jetzt {formatTime(CURRENT_TIME_MINUTES)} Uhr</Text>
             <Text style={styles.pageTitle}>Freie Lernräume</Text>
-            <Text style={styles.helperText}>{freeRoomCount} Räume sind gerade frei</Text>
+            <Text style={styles.helperText}>{freeRoomCount} Räume sind aktuell direkt frei</Text>
+          </View>
+
+          <View style={styles.legendRow}>
+            <View style={[styles.legendDot, styles.legendFree]} />
+            <Text style={styles.legendText}>frei</Text>
+            <View style={[styles.legendDot, styles.legendCurrent]} />
+            <Text style={styles.legendText}>jetzt belegt</Text>
+            <View style={[styles.legendDot, styles.legendFull]} />
+            <Text style={styles.legendText}>ausgebucht</Text>
           </View>
 
           <View style={styles.roomList}>
-            {rooms.map((room) => (
-              <TouchableOpacity
-                key={room.id}
-                activeOpacity={0.85}
-                style={[styles.roomCard, !room.available && styles.occupiedCard]}
-                onPress={() => showRoom(room)}
-              >
-                <View style={styles.cardTopRow}>
-                  <View style={styles.cardTitleBlock}>
-                    <Text style={[styles.roomName, !room.available && styles.mutedText]}>
-                      {room.name}
-                    </Text>
-                    <Text style={styles.roomLocation}>
-                      {room.building} · {room.floor}
-                    </Text>
-                  </View>
-                  <View style={[styles.statusBadge, room.available ? styles.freeBadge : styles.occupiedBadge]}>
-                    <Text style={[styles.statusText, room.available ? styles.freeText : styles.occupiedText]}>
-                      {room.available ? 'Frei' : 'Belegt'}
-                    </Text>
-                  </View>
-                </View>
+            {rooms.map((room) => {
+              const status = getRoomStatus(room);
+              const statusLabel =
+                status === 'free'
+                  ? 'Frei'
+                  : status === 'current'
+                    ? 'Jetzt belegt'
+                    : 'Heute ausgebucht';
 
-                <Text style={styles.cardMeta}>{room.capacity} Plätze</Text>
-                <View style={styles.chipRow}>
-                  {room.equipment.slice(0, 3).map((item) => (
-                    <View key={item} style={styles.smallChip}>
-                      <Text style={styles.smallChipText}>{item}</Text>
+              return (
+                <TouchableOpacity
+                  key={room.id}
+                  activeOpacity={0.85}
+                  style={[
+                    styles.roomCard,
+                    status === 'current' && styles.currentCard,
+                    status === 'full' && styles.fullCard,
+                  ]}
+                  onPress={() => openRoom(room)}
+                >
+                  <View style={styles.cardTopRow}>
+                    <View style={styles.cardTitleBlock}>
+                      <Text style={[styles.roomName, status !== 'free' && styles.mutedText]}>
+                        {room.name}
+                      </Text>
+                      <Text style={styles.roomLocation}>
+                        {room.building} · {room.floor}
+                      </Text>
                     </View>
-                  ))}
-                </View>
-              </TouchableOpacity>
-            ))}
+                    <View
+                      style={[
+                        styles.statusBadge,
+                        status === 'free' && styles.freeBadge,
+                        status === 'current' && styles.currentBadge,
+                        status === 'full' && styles.fullBadge,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.statusText,
+                          status === 'free' && styles.freeText,
+                          status === 'current' && styles.currentText,
+                          status === 'full' && styles.fullText,
+                        ]}
+                      >
+                        {statusLabel}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Text style={styles.cardMeta}>{room.capacity} Plätze · 30-Minuten-Slots</Text>
+                  <Text style={styles.availabilityText}>{getNextAvailableText(room)}</Text>
+                  <View style={styles.chipRow}>
+                    {room.equipment.slice(0, 3).map((item) => (
+                      <View key={item} style={styles.smallChip}>
+                        <Text style={styles.smallChipText}>{item}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </ScrollView>
       )}
@@ -207,14 +346,32 @@ export default function App() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <TouchableOpacity style={styles.backButton} onPress={backToRooms}>
+          <TouchableOpacity style={styles.backButton} onPress={goToRooms}>
             <Text style={styles.backButtonText}>Zurück</Text>
           </TouchableOpacity>
 
           <View style={styles.detailHero}>
-            <View style={[styles.statusBadge, selectedRoom.available ? styles.freeBadge : styles.occupiedBadge]}>
-              <Text style={[styles.statusText, selectedRoom.available ? styles.freeText : styles.occupiedText]}>
-                {selectedRoom.available ? 'Frei' : 'Belegt'}
+            <View
+              style={[
+                styles.statusBadge,
+                getRoomStatus(selectedRoom) === 'free' && styles.freeBadge,
+                getRoomStatus(selectedRoom) === 'current' && styles.currentBadge,
+                getRoomStatus(selectedRoom) === 'full' && styles.fullBadge,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.statusText,
+                  getRoomStatus(selectedRoom) === 'free' && styles.freeText,
+                  getRoomStatus(selectedRoom) === 'current' && styles.currentText,
+                  getRoomStatus(selectedRoom) === 'full' && styles.fullText,
+                ]}
+              >
+                {getRoomStatus(selectedRoom) === 'free'
+                  ? 'Jetzt frei'
+                  : getRoomStatus(selectedRoom) === 'current'
+                    ? 'Jetzt belegt'
+                    : 'Heute ausgebucht'}
               </Text>
             </View>
             <Text style={styles.detailTitle}>{selectedRoom.name}</Text>
@@ -229,9 +386,66 @@ export default function App() {
               <Text style={styles.infoValue}>{selectedRoom.capacity} Plätze</Text>
             </View>
             <View style={styles.infoBox}>
-              <Text style={styles.infoLabel}>Verfügbar</Text>
-              <Text style={styles.infoValue}>{selectedRoom.availableTime}</Text>
+              <Text style={styles.infoLabel}>Buchungsfenster</Text>
+              <Text style={styles.infoValue}>08:00 - 18:00 Uhr</Text>
             </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Dauer wählen</Text>
+            <View style={styles.durationGrid}>
+              {durationOptions.map((duration) => (
+                <TouchableOpacity
+                  key={duration}
+                  activeOpacity={0.85}
+                  style={[
+                    styles.durationOption,
+                    selectedDuration === duration && styles.durationOptionActive,
+                  ]}
+                  onPress={() => changeDuration(duration)}
+                >
+                  <Text
+                    style={[
+                      styles.durationOptionText,
+                      selectedDuration === duration && styles.durationOptionTextActive,
+                    ]}
+                  >
+                    {formatDuration(duration)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Startzeit</Text>
+            {availableStarts.length === 0 ? (
+              <View style={styles.emptySlots}>
+                <Text style={styles.emptySlotsText}>
+                  Für diese Dauer ist heute kein Slot mehr frei.
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.slotGrid}>
+                {availableStarts.map((start) => (
+                  <TouchableOpacity
+                    key={start}
+                    activeOpacity={0.85}
+                    style={[styles.slotChip, selectedStart === start && styles.slotChipActive]}
+                    onPress={() => setSelectedStart(start)}
+                  >
+                    <Text
+                      style={[
+                        styles.slotChipText,
+                        selectedStart === start && styles.slotChipTextActive,
+                      ]}
+                    >
+                      {formatTime(start)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
           </View>
 
           <View style={styles.section}>
@@ -247,7 +461,7 @@ export default function App() {
 
           <TouchableOpacity
             activeOpacity={0.85}
-            style={[styles.primaryButton, !selectedRoom.available && styles.disabledButton]}
+            style={[styles.primaryButton, availableStarts.length === 0 && styles.disabledButton]}
             onPress={bookRoom}
           >
             <Text style={styles.primaryButtonText}>Raum buchen</Text>
@@ -255,14 +469,21 @@ export default function App() {
         </ScrollView>
       )}
 
-      {currentScreen === 'success' && bookedRoom && (
+      {currentScreen === 'success' && bookedRoom && bookedSlot && (
         <View style={styles.successScreen}>
           <View style={styles.successMark}>
             <Text style={styles.successMarkText}>✓</Text>
           </View>
           <Text style={styles.successTitle}>Deine Buchung wurde bestätigt</Text>
-          <Text style={styles.successSubtitle}>{bookedRoom.name} ist für dich reserviert.</Text>
-          <TouchableOpacity activeOpacity={0.85} style={styles.primaryButton} onPress={backToRooms}>
+          <Text style={styles.successSubtitle}>
+            {bookedRoom.name} ist von {formatTime(bookedSlot.start)} bis{' '}
+            {formatTime(bookedSlot.end)} Uhr für dich reserviert.
+          </Text>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            style={styles.primaryButton}
+            onPress={goToRooms}
+          >
             <Text style={styles.primaryButtonText}>Zurück zur Übersicht</Text>
           </TouchableOpacity>
         </View>
@@ -276,6 +497,10 @@ const colors = {
   navySoft: '#14345c',
   green: '#19a66a',
   greenSoft: '#e8f8f0',
+  amber: '#c98213',
+  amberSoft: '#fff5df',
+  red: '#b33a3a',
+  redSoft: '#fdecec',
   background: '#f4f7fb',
   card: '#ffffff',
   text: '#102033',
@@ -370,7 +595,7 @@ const styles = StyleSheet.create({
     paddingBottom: 34,
   },
   header: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   kicker: {
     marginBottom: 6,
@@ -389,6 +614,33 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 16,
   },
+  legendRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 18,
+  },
+  legendDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 99,
+  },
+  legendFree: {
+    backgroundColor: colors.green,
+  },
+  legendCurrent: {
+    backgroundColor: colors.amber,
+  },
+  legendFull: {
+    backgroundColor: colors.red,
+  },
+  legendText: {
+    marginRight: 8,
+    color: colors.muted,
+    fontSize: 13,
+    fontWeight: '700',
+  },
   roomList: {
     gap: 14,
   },
@@ -404,9 +656,14 @@ const styles = StyleSheet.create({
     shadowRadius: 18,
     elevation: 3,
   },
-  occupiedCard: {
-    opacity: 0.58,
-    shadowOpacity: 0.02,
+  currentCard: {
+    borderColor: '#f0d59d',
+    backgroundColor: '#fffaf0',
+  },
+  fullCard: {
+    borderColor: '#f2c4c4',
+    backgroundColor: '#fff6f6',
+    opacity: 0.72,
   },
   cardTopRow: {
     flexDirection: 'row',
@@ -438,8 +695,11 @@ const styles = StyleSheet.create({
   freeBadge: {
     backgroundColor: colors.greenSoft,
   },
-  occupiedBadge: {
-    backgroundColor: '#edf0f5',
+  currentBadge: {
+    backgroundColor: colors.amberSoft,
+  },
+  fullBadge: {
+    backgroundColor: colors.redSoft,
   },
   statusText: {
     fontSize: 13,
@@ -448,14 +708,23 @@ const styles = StyleSheet.create({
   freeText: {
     color: colors.green,
   },
-  occupiedText: {
-    color: '#748196',
+  currentText: {
+    color: colors.amber,
+  },
+  fullText: {
+    color: colors.red,
   },
   cardMeta: {
     marginTop: 14,
     color: colors.navySoft,
     fontSize: 15,
     fontWeight: '700',
+  },
+  availabilityText: {
+    marginTop: 6,
+    color: colors.muted,
+    fontSize: 14,
+    fontWeight: '600',
   },
   chipRow: {
     flexDirection: 'row',
@@ -535,6 +804,69 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     color: colors.navy,
     fontSize: 20,
+    fontWeight: '800',
+  },
+  durationGrid: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  durationOption: {
+    flex: 1,
+    minHeight: 52,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.card,
+  },
+  durationOptionActive: {
+    borderColor: colors.navy,
+    backgroundColor: colors.navy,
+  },
+  durationOptionText: {
+    color: colors.navy,
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  durationOptionTextActive: {
+    color: '#ffffff',
+  },
+  slotGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  slotChip: {
+    minWidth: 72,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: 13,
+    paddingVertical: 11,
+    alignItems: 'center',
+    backgroundColor: colors.card,
+  },
+  slotChipActive: {
+    borderColor: colors.green,
+    backgroundColor: colors.green,
+  },
+  slotChipText: {
+    color: colors.navy,
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  slotChipTextActive: {
+    color: '#ffffff',
+  },
+  emptySlots: {
+    borderRadius: 16,
+    padding: 16,
+    backgroundColor: colors.redSoft,
+  },
+  emptySlotsText: {
+    color: colors.red,
+    fontSize: 14,
     fontWeight: '800',
   },
   detailChipRow: {
