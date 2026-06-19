@@ -244,7 +244,12 @@ export default function App() {
         </ScrollView>
       )}
       {screen === 'success' && bookedRoom && bookedSlot && (
-        <View style={styles.success}><Text style={styles.check}>OK</Text><Text style={styles.title}>Deine Buchung wurde bestätigt</Text><Text style={styles.sub}>{bookedRoom.name} ist von {time(bookedSlot.start)} bis {time(bookedSlot.end)} Uhr reserviert.</Text><TouchableOpacity style={styles.primary} onPress={goRooms}><Text style={styles.primaryText}>Zurück zur Übersicht</Text></TouchableOpacity></View>
+        <View style={styles.success}>
+          <View style={styles.checkCircle}><Text style={styles.checkIcon}>✓</Text></View>
+          <Text style={styles.successTitle}>Deine Buchung wurde bestätigt</Text>
+          <Text style={styles.successText}>{bookedRoom.name} ist von {time(bookedSlot.start)} bis {time(bookedSlot.end)} Uhr für dich reserviert.</Text>
+          <TouchableOpacity style={[styles.primary, styles.successButton]} onPress={goRooms}><Text style={styles.primaryText}>Zurück zur Übersicht</Text></TouchableOpacity>
+        </View>
       )}
       {screen === 'profile' && <ProfileMenu onBack={goRooms} onData={() => setScreen('profileData')} onBookings={() => setScreen('bookings')} />}
       {screen === 'profileData' && <ProfileData onBack={() => setScreen('profile')} />}
@@ -262,8 +267,18 @@ function StudyIcon({ small }: { small?: boolean }) {
 }
 
 function Loading({ dots, progress }: { dots: Animated.Value[]; progress: Animated.Value }) {
-  const items = [{ label: 'Buch', icon: '▭' }, { label: 'Stift', icon: '✎' }, { label: 'Raum', icon: '⌂' }];
-  return <View style={styles.loading}><Text style={styles.kicker}>Campusdaten werden vorbereitet</Text><Text style={styles.title}>StudySpaces laden</Text><Text style={styles.sub}>Räume, Zeitfenster und Verfügbarkeit werden lokal geladen.</Text><View style={styles.loadingIcons}>{items.map((item, index) => <Animated.View key={item.label} style={[styles.loadingCard, { transform: [{ translateY: dots[index].interpolate({ inputRange: [0, 1], outputRange: [0, -12] }) }] }]}><Text style={styles.loadingSymbol}>{item.icon}</Text><Text style={styles.loadingIcon}>{item.label}</Text></Animated.View>)}</View><View style={styles.dotRow}>{dots.map((dot, index) => <Animated.View key={index} style={[styles.dot, { opacity: dot.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) }]} />)}</View><View style={styles.track}><Animated.View style={[styles.fill, { width: progress.interpolate({ inputRange: [0, 1], outputRange: ['8%', '100%'] }) }]} /></View></View>;
+  const items = [
+    { label: 'Räume', icon: 'room' },
+    { label: 'Ausstattung', icon: 'equipment' },
+    { label: 'Lernen', icon: 'study' },
+  ];
+  return <View style={styles.loading}><Text style={styles.kicker}>Campusdaten werden vorbereitet</Text><Text style={styles.title}>StudySpaces laden</Text><Text style={styles.sub}>Räume, Zeitfenster und Verfügbarkeit werden lokal geladen.</Text><View style={styles.loadingIcons}>{items.map((item, index) => <Animated.View key={item.label} style={[styles.loadingCard, { transform: [{ translateY: dots[index].interpolate({ inputRange: [0, 1], outputRange: [0, -12] }) }] }]}><LoadingMiniIcon type={item.icon} /><Text style={styles.loadingIcon}>{item.label}</Text></Animated.View>)}</View><View style={styles.dotRow}>{dots.map((dot, index) => <Animated.View key={index} style={[styles.dot, { opacity: dot.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) }]} />)}</View><View style={styles.track}><Animated.View style={[styles.fill, { width: progress.interpolate({ inputRange: [0, 1], outputRange: ['8%', '100%'] }) }]} /></View></View>;
+}
+
+function LoadingMiniIcon({ type }: { type: string }) {
+  if (type === 'room') return <View style={styles.roomMini}><View style={styles.roomMiniBoard} /><View style={styles.roomMiniTable} /></View>;
+  if (type === 'equipment') return <View style={styles.equipmentMini}><View style={styles.equipmentScreen} /><View style={styles.equipmentStand} /></View>;
+  return <View style={styles.studyMini}><View style={styles.studyMiniBook} /><View style={styles.studyMiniPencil} /></View>;
 }
 
 function RoomCard({ room, status, label, isToday, onPress }: { room: Room; status: string; label: string; isToday: boolean; onPress: () => void }) {
@@ -289,7 +304,7 @@ function ProfileData({ onBack }: { onBack: () => void }) {
 }
 
 function Bookings({ onBack }: { onBack: () => void }) {
-  return <ScrollView style={styles.screen} contentContainerStyle={styles.scroll}><Back onPress={onBack} /><Text style={styles.title}>Meine Buchungen</Text><Text style={styles.sub}>Hier sind deine Buchungen. Achtet bei der Nutzung auf eine verantwortungsvolle Nutzung, damit die Studis von morgen auch etwas davon haben.</Text>{profileBookings.map((booking) => <View style={styles.bookingCard} key={`${booking.room}-${booking.day}`}><Text style={styles.roomName}>{booking.room}</Text><Text style={styles.meta}>{booking.building}</Text><View style={styles.bookingDate}><Text style={styles.dayCount}>{booking.day}</Text><Text style={styles.cardMeta}>{booking.slot}</Text></View></View>)}</ScrollView>;
+  return <ScrollView style={styles.screen} contentContainerStyle={styles.scroll}><Back onPress={onBack} /><Text style={styles.title}>Meine Buchungen</Text><Text style={styles.sub}>Hier sind deine Buchungen. Bitte nutze Räume verantwortungsvoll, damit alle Studis etwas davon haben.</Text>{profileBookings.map((booking) => <View style={styles.bookingCard} key={`${booking.room}-${booking.day}`}><Text style={styles.roomName}>{booking.room}</Text><Text style={styles.meta}>{booking.building}</Text><View style={styles.bookingDate}><Text style={styles.dayCount}>{booking.day}</Text><Text style={styles.cardMeta}>{booking.slot}</Text></View></View>)}</ScrollView>;
 }
 
 function Back({ onPress }: { onPress: () => void }) {
@@ -340,6 +355,15 @@ const styles = StyleSheet.create({
   loadingCard: { width: 88, height: 98, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: c.card, borderWidth: 1, borderColor: c.border },
   loadingSymbol: { color: c.navy, fontSize: 27, fontWeight: '900', marginBottom: 8 },
   loadingIcon: { color: c.green, fontSize: 14, fontWeight: '900' },
+  roomMini: { width: 42, height: 34, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
+  roomMiniBoard: { width: 38, height: 20, borderRadius: 6, borderWidth: 2, borderColor: c.green, backgroundColor: c.greenSoft },
+  roomMiniTable: { width: 28, height: 7, borderRadius: 99, marginTop: 5, backgroundColor: c.navy },
+  equipmentMini: { width: 42, height: 34, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
+  equipmentScreen: { width: 34, height: 23, borderRadius: 6, borderWidth: 2, borderColor: c.green, backgroundColor: '#fff' },
+  equipmentStand: { width: 18, height: 5, borderRadius: 99, marginTop: 4, backgroundColor: c.navy },
+  studyMini: { width: 42, height: 34, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
+  studyMiniBook: { width: 31, height: 22, borderRadius: 7, backgroundColor: c.greenSoft, borderWidth: 2, borderColor: c.green },
+  studyMiniPencil: { position: 'absolute', right: 2, top: 3, width: 8, height: 30, borderRadius: 99, backgroundColor: c.green, transform: [{ rotate: '28deg' }] },
   dotRow: { flexDirection: 'row', gap: 10, height: 20 },
   dot: { width: 11, height: 11, borderRadius: 99, backgroundColor: c.green },
   track: { width: '78%', maxWidth: 260, height: 9, borderRadius: 99, overflow: 'hidden', marginTop: 22, backgroundColor: '#dde6f1' },
@@ -401,8 +425,13 @@ const styles = StyleSheet.create({
   slotSub: { marginTop: 4, color: c.muted, fontSize: 14, fontWeight: '700' },
   slotPill: { color: c.green, fontSize: 12, fontWeight: '900' },
   empty: { borderRadius: 16, padding: 16, color: c.red, fontSize: 14, fontWeight: '900', backgroundColor: c.redSoft },
-  success: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+  success: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 28 },
   check: { width: 86, height: 86, borderRadius: 28, textAlign: 'center', textAlignVertical: 'center', lineHeight: 86, marginBottom: 24, color: '#fff', fontSize: 24, fontWeight: '900', backgroundColor: c.green },
+  checkCircle: { width: 92, height: 92, borderRadius: 30, alignItems: 'center', justifyContent: 'center', marginBottom: 24, backgroundColor: c.green, shadowColor: c.green, shadowOpacity: 0.24, shadowRadius: 18, elevation: 7 },
+  checkIcon: { color: '#fff', fontSize: 46, fontWeight: '900' },
+  successTitle: { color: c.navy, fontSize: 30, fontWeight: '900', lineHeight: 37, textAlign: 'center' },
+  successText: { marginTop: 12, marginBottom: 22, color: c.muted, fontSize: 17, lineHeight: 24, textAlign: 'center' },
+  successButton: { maxWidth: 340 },
   profileHero: { borderRadius: 24, padding: 24, alignItems: 'center', backgroundColor: c.navy, marginBottom: 18 },
   bigAvatar: { width: 76, height: 76, borderRadius: 26, alignItems: 'center', justifyContent: 'center', backgroundColor: c.green },
   bigAvatarText: { color: '#fff', fontSize: 24, fontWeight: '900' },
