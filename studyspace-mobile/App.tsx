@@ -1,121 +1,100 @@
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
-import {
-  Alert,
-  Animated,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Alert, Animated, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-type Screen = 'home' | 'login' | 'loading' | 'rooms' | 'detail' | 'success';
-type Status = 'free' | 'current' | 'partial' | 'full';
-type OptionId = 'morning' | 'afternoon' | 'fullDay';
+type Screen = 'home' | 'login' | 'loading' | 'rooms' | 'detail' | 'success' | 'profile' | 'profileData' | 'bookings';
+type SlotId = 'morning' | 'afternoon' | 'day';
 type Booking = { start: number; end: number };
-type Option = Booking & { id: OptionId; title: string; subtitle: string };
 type Room = { id: string; name: string; building: string; floor: string; capacity: number; equipment: string[]; bookings: Booking[] };
-type Workday = { key: string; label: string; shortLabel: string; dateText: string; isToday: boolean; index: number };
+type Workday = { key: string; label: string; short: string; date: string; isToday: boolean; index: number };
 
-const MORNING_START = 8 * 60;
-const AFTERNOON_START = 13 * 60;
-const DAY_END = 18 * 60;
+const MORNING = 8 * 60;
+const AFTERNOON = 13 * 60;
+const END = 18 * 60;
 const NOW = 10 * 60 + 30;
-const weekdays = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
-
-const options: Option[] = [
-  { id: 'morning', title: 'Vormittag', subtitle: '08:00 - 13:00 Uhr', start: MORNING_START, end: AFTERNOON_START },
-  { id: 'afternoon', title: 'Nachmittag', subtitle: '13:00 - 18:00 Uhr', start: AFTERNOON_START, end: DAY_END },
-  { id: 'fullDay', title: 'Ganzer Tag', subtitle: '08:00 - 18:00 Uhr', start: MORNING_START, end: DAY_END },
+const week = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+const slots = [
+  { id: 'morning' as SlotId, title: 'Vormittag', subtitle: '08:00 - 13:00 Uhr', start: MORNING, end: AFTERNOON },
+  { id: 'afternoon' as SlotId, title: 'Nachmittag', subtitle: '13:00 - 18:00 Uhr', start: AFTERNOON, end: END },
+  { id: 'day' as SlotId, title: 'Ganzer Tag', subtitle: '08:00 - 18:00 Uhr', start: MORNING, end: END },
 ];
 
 const todayRooms: Room[] = [
-  { id: 'a101', name: 'A101', building: 'Gebäude A', floor: 'Etage 1', capacity: 6, equipment: ['Beamer', 'Whiteboard', 'Steckdosen', 'WLAN', 'USB-C Dock', 'Tageslicht'], bookings: [{ start: MORNING_START, end: AFTERNOON_START }] },
-  { id: 'b204', name: 'B204', building: 'Gebäude B', floor: 'Etage 2', capacity: 4, equipment: ['Monitor', 'Steckdosen', 'WLAN', 'HDMI', 'Ergostühle'], bookings: [] },
-  { id: 'c015', name: 'C015', building: 'Bibliothek', floor: 'Erdgeschoss', capacity: 8, equipment: ['Smartboard', 'Whiteboard', 'Gruppenarbeitstisch', 'WLAN', 'Moderationskarten', 'Akustikpaneele'], bookings: [{ start: AFTERNOON_START, end: DAY_END }] },
-  { id: 'd310', name: 'D310', building: 'Gebäude D', floor: 'Etage 3', capacity: 10, equipment: ['Beamer', 'Lautsprecher', 'Whiteboard', 'WLAN', 'Videokonferenz-Set', 'Flipchart'], bookings: [{ start: MORNING_START, end: DAY_END }] },
-  { id: 'bib22', name: 'Bib-22', building: 'Bibliothek', floor: 'Etage 2', capacity: 2, equipment: ['Ruhiger Bereich', 'Steckdosen', 'WLAN', 'Leselampe', 'Sichtschutz'], bookings: [] },
-  { id: 'e112', name: 'E112', building: 'Gebäude E', floor: 'Etage 1', capacity: 5, equipment: ['Whiteboard', 'WLAN', 'Steckdosen', 'Dokumentenkamera', 'Pinnwand'], bookings: [] },
-  { id: 'f021', name: 'F021', building: 'Gebäude F', floor: 'Erdgeschoss', capacity: 12, equipment: ['Smartboard', 'Beamer', 'Lautsprecher', 'WLAN', 'Konferenztisch', 'Kamera'], bookings: [{ start: AFTERNOON_START, end: DAY_END }] },
-  { id: 'lab3', name: 'Lab-3', building: 'Medienlabor', floor: 'Etage 1', capacity: 6, equipment: ['Mac-Arbeitsplätze', 'Großbildschirm', 'WLAN', 'USB-C Dock', 'Audiointerface'], bookings: [{ start: MORNING_START, end: AFTERNOON_START }] },
-  { id: 'bib05', name: 'Bib-05', building: 'Bibliothek', floor: 'Erdgeschoss', capacity: 3, equipment: ['Ruhiger Bereich', 'WLAN', 'Steckdosen', 'Schreibtischleuchte', 'Whiteboard mobil'], bookings: [] },
-  { id: 'g404', name: 'G404', building: 'Gebäude G', floor: 'Etage 4', capacity: 14, equipment: ['Beamer', 'Smartboard', 'Whiteboard', 'WLAN', 'Hybrid-Meeting', 'Klimaanlage'], bookings: [{ start: MORNING_START, end: DAY_END }] },
-  { id: 'a220', name: 'A220', building: 'Gebäude A', floor: 'Etage 2', capacity: 4, equipment: ['Monitor', 'WLAN', 'Steckdosen', 'Glasboard', 'Telefonbox nah'], bookings: [] },
+  { id: 'a101', name: 'A101', building: 'Gebaeude A', floor: 'Etage 1', capacity: 6, equipment: ['Beamer', 'Whiteboard', 'Steckdosen', 'WLAN', 'USB-C Dock'], bookings: [{ start: MORNING, end: AFTERNOON }] },
+  { id: 'b204', name: 'B204', building: 'Gebaeude B', floor: 'Etage 2', capacity: 4, equipment: ['Monitor', 'Steckdosen', 'WLAN', 'HDMI', 'Ergostuehle'], bookings: [] },
+  { id: 'c015', name: 'C015', building: 'Bibliothek', floor: 'Erdgeschoss', capacity: 8, equipment: ['Smartboard', 'Whiteboard', 'Gruppentisch', 'WLAN', 'Akustikpaneele'], bookings: [{ start: AFTERNOON, end: END }] },
+  { id: 'd310', name: 'D310', building: 'Gebaeude D', floor: 'Etage 3', capacity: 10, equipment: ['Beamer', 'Lautsprecher', 'Whiteboard', 'WLAN', 'Kamera'], bookings: [{ start: MORNING, end: END }] },
+  { id: 'bib22', name: 'Bib-22', building: 'Bibliothek', floor: 'Etage 2', capacity: 2, equipment: ['Ruhiger Bereich', 'Steckdosen', 'WLAN', 'Leselampe'], bookings: [] },
+  { id: 'f021', name: 'F021', building: 'Gebaeude F', floor: 'Erdgeschoss', capacity: 12, equipment: ['Smartboard', 'Beamer', 'WLAN', 'Konferenztisch'], bookings: [{ start: AFTERNOON, end: END }] },
+  { id: 'lab3', name: 'Lab-3', building: 'Medienlabor', floor: 'Etage 1', capacity: 6, equipment: ['Mac-Arbeitsplaetze', 'Grossbildschirm', 'WLAN', 'Audiointerface'], bookings: [{ start: MORNING, end: AFTERNOON }] },
+  { id: 'g404', name: 'G404', building: 'Gebaeude G', floor: 'Etage 4', capacity: 14, equipment: ['Smartboard', 'Whiteboard', 'WLAN', 'Hybrid-Meeting'], bookings: [{ start: MORNING, end: END }] },
+  { id: 'a220', name: 'A220', building: 'Gebaeude A', floor: 'Etage 2', capacity: 4, equipment: ['Monitor', 'WLAN', 'Steckdosen', 'Glasboard'], bookings: [] },
 ];
 
-const futureRoomSets: Room[][] = [
+const futureSets: Room[][] = [
   [
-    { id: 'mx101', name: 'MX101', building: 'MakerSpace', floor: 'Etage 1', capacity: 6, equipment: ['3D-Drucker nah', 'Whiteboard', 'WLAN', 'Steckdosen', 'Projektor'], bookings: [{ start: AFTERNOON_START, end: DAY_END }] },
-    { id: 'h205', name: 'H205', building: 'Gebäude H', floor: 'Etage 2', capacity: 8, equipment: ['Smartboard', 'WLAN', 'USB-C Dock', 'Gruppentisch', 'Flipchart'], bookings: [] },
-    { id: 'bib14', name: 'Bib-14', building: 'Bibliothek', floor: 'Etage 1', capacity: 4, equipment: ['Ruhiger Bereich', 'Steckdosen', 'Leselampen', 'WLAN'], bookings: [{ start: MORNING_START, end: AFTERNOON_START }] },
-    { id: 'j030', name: 'J030', building: 'Gebäude J', floor: 'Erdgeschoss', capacity: 10, equipment: ['Beamer', 'Whiteboard', 'Lautsprecher', 'WLAN', 'Konferenztisch'], bookings: [{ start: MORNING_START, end: DAY_END }] },
+    { id: 'mx101', name: 'MX101', building: 'MakerSpace', floor: 'Etage 1', capacity: 6, equipment: ['3D-Drucker nah', 'Whiteboard', 'WLAN'], bookings: [{ start: AFTERNOON, end: END }] },
+    { id: 'h205', name: 'H205', building: 'Gebaeude H', floor: 'Etage 2', capacity: 8, equipment: ['Smartboard', 'USB-C Dock', 'WLAN'], bookings: [] },
+    { id: 'j030', name: 'J030', building: 'Gebaeude J', floor: 'Erdgeschoss', capacity: 10, equipment: ['Beamer', 'Whiteboard', 'WLAN'], bookings: [{ start: MORNING, end: END }] },
   ],
   [
-    { id: 'a303', name: 'A303', building: 'Gebäude A', floor: 'Etage 3', capacity: 5, equipment: ['Monitor', 'WLAN', 'Steckdosen', 'Glasboard', 'Tageslicht'], bookings: [] },
-    { id: 'c102', name: 'C102', building: 'Gebäude C', floor: 'Etage 1', capacity: 7, equipment: ['Smartboard', 'Whiteboard', 'Moderationswand', 'WLAN'], bookings: [{ start: AFTERNOON_START, end: DAY_END }] },
-    { id: 'bib31', name: 'Bib-31', building: 'Bibliothek', floor: 'Etage 3', capacity: 2, equipment: ['Silent Zone', 'Steckdosen', 'Leselampe', 'WLAN'], bookings: [] },
-    { id: 'f118', name: 'F118', building: 'Gebäude F', floor: 'Etage 1', capacity: 12, equipment: ['Beamer', 'Hybrid-Meeting', 'Kamera', 'WLAN', 'Akustikpaneele'], bookings: [{ start: MORNING_START, end: DAY_END }] },
+    { id: 'a303', name: 'A303', building: 'Gebaeude A', floor: 'Etage 3', capacity: 5, equipment: ['Monitor', 'WLAN', 'Tageslicht'], bookings: [] },
+    { id: 'c102', name: 'C102', building: 'Gebaeude C', floor: 'Etage 1', capacity: 7, equipment: ['Smartboard', 'Whiteboard', 'WLAN'], bookings: [{ start: AFTERNOON, end: END }] },
+    { id: 'bib31', name: 'Bib-31', building: 'Bibliothek', floor: 'Etage 3', capacity: 2, equipment: ['Silent Zone', 'Steckdosen', 'WLAN'], bookings: [] },
   ],
   [
-    { id: 'd022', name: 'D022', building: 'Gebäude D', floor: 'Erdgeschoss', capacity: 6, equipment: ['Whiteboard', 'WLAN', 'Pinnwand', 'Steckdosen', 'HDMI'], bookings: [{ start: MORNING_START, end: AFTERNOON_START }] },
-    { id: 'g210', name: 'G210', building: 'Gebäude G', floor: 'Etage 2', capacity: 9, equipment: ['Smartboard', 'Lautsprecher', 'WLAN', 'Konferenztisch'], bookings: [] },
-    { id: 'med2', name: 'Media-2', building: 'Medienlabor', floor: 'Etage 1', capacity: 4, equipment: ['Mac-Arbeitsplätze', 'Audiointerface', 'Großbildschirm', 'WLAN'], bookings: [{ start: AFTERNOON_START, end: DAY_END }] },
-    { id: 'bib07', name: 'Bib-07', building: 'Bibliothek', floor: 'Erdgeschoss', capacity: 3, equipment: ['Ruhiger Bereich', 'Schreibtischleuchte', 'Steckdosen', 'WLAN'], bookings: [] },
+    { id: 'd022', name: 'D022', building: 'Gebaeude D', floor: 'Erdgeschoss', capacity: 6, equipment: ['Whiteboard', 'Pinnwand', 'WLAN'], bookings: [{ start: MORNING, end: AFTERNOON }] },
+    { id: 'g210', name: 'G210', building: 'Gebaeude G', floor: 'Etage 2', capacity: 9, equipment: ['Smartboard', 'Lautsprecher', 'WLAN'], bookings: [] },
+    { id: 'media2', name: 'Media-2', building: 'Medienlabor', floor: 'Etage 1', capacity: 4, equipment: ['Mac-Arbeitsplaetze', 'Audiointerface', 'WLAN'], bookings: [{ start: AFTERNOON, end: END }] },
   ],
   [
-    { id: 'k115', name: 'K115', building: 'Gebäude K', floor: 'Etage 1', capacity: 8, equipment: ['Beamer', 'Whiteboard', 'WLAN', 'Moderationskoffer'], bookings: [] },
-    { id: 'l404', name: 'L404', building: 'Gebäude L', floor: 'Etage 4', capacity: 14, equipment: ['Smartboard', 'Hybrid-Meeting', 'Klimaanlage', 'WLAN'], bookings: [{ start: MORNING_START, end: DAY_END }] },
-    { id: 'bib26', name: 'Bib-26', building: 'Bibliothek', floor: 'Etage 2', capacity: 2, equipment: ['Silent Zone', 'Sichtschutz', 'Steckdosen', 'WLAN'], bookings: [{ start: MORNING_START, end: AFTERNOON_START }] },
-    { id: 'e009', name: 'E009', building: 'Gebäude E', floor: 'Erdgeschoss', capacity: 5, equipment: ['Monitor', 'USB-C Dock', 'Whiteboard', 'WLAN'], bookings: [] },
+    { id: 'k115', name: 'K115', building: 'Gebaeude K', floor: 'Etage 1', capacity: 8, equipment: ['Beamer', 'Whiteboard', 'WLAN'], bookings: [] },
+    { id: 'l404', name: 'L404', building: 'Gebaeude L', floor: 'Etage 4', capacity: 14, equipment: ['Smartboard', 'Hybrid-Meeting', 'WLAN'], bookings: [{ start: MORNING, end: END }] },
+    { id: 'e009', name: 'E009', building: 'Gebaeude E', floor: 'Erdgeschoss', capacity: 5, equipment: ['Monitor', 'USB-C Dock', 'WLAN'], bookings: [] },
   ],
   [
-    { id: 'b018', name: 'B018', building: 'Gebäude B', floor: 'Erdgeschoss', capacity: 6, equipment: ['Whiteboard', 'Steckdosen', 'WLAN', 'Flipchart'], bookings: [{ start: AFTERNOON_START, end: DAY_END }] },
-    { id: 'c220', name: 'C220', building: 'Gebäude C', floor: 'Etage 2', capacity: 10, equipment: ['Smartboard', 'Gruppentisch', 'WLAN', 'Beamer'], bookings: [] },
-    { id: 'bib40', name: 'Bib-40', building: 'Bibliothek', floor: 'Etage 4', capacity: 4, equipment: ['Panoramafenster', 'Leselampen', 'Steckdosen', 'WLAN'], bookings: [] },
-    { id: 'lab7', name: 'Lab-7', building: 'Medienlabor', floor: 'Etage 2', capacity: 6, equipment: ['Schnittplätze', 'Großbildschirm', 'Audiointerface', 'WLAN'], bookings: [{ start: MORNING_START, end: DAY_END }] },
+    { id: 'b018', name: 'B018', building: 'Gebaeude B', floor: 'Erdgeschoss', capacity: 6, equipment: ['Whiteboard', 'Steckdosen', 'WLAN'], bookings: [{ start: AFTERNOON, end: END }] },
+    { id: 'c220', name: 'C220', building: 'Gebaeude C', floor: 'Etage 2', capacity: 10, equipment: ['Smartboard', 'Gruppentisch', 'WLAN'], bookings: [] },
+    { id: 'bib40', name: 'Bib-40', building: 'Bibliothek', floor: 'Etage 4', capacity: 4, equipment: ['Leselampen', 'Steckdosen', 'WLAN'], bookings: [] },
   ],
+];
+
+const profileRows = [
+  ['Name', 'Mira'],
+  ['Nachname', 'Schneider'],
+  ['Matrikelnummer', '1124587'],
+  ['Eingeschrieben in', 'BBW'],
+  ['Campus / Fachbereich', 'HSNR Campus MG - Fachbereich 08'],
+  ['Zugang', 'Bis Ende des Semesters aktiv'],
+];
+
+const profileBookings = [
+  { room: 'B204', day: 'Heute', building: 'Gebaeude B', slot: 'Nachmittag - 13:00 bis 18:00 Uhr' },
+  { room: 'Bib-22', day: 'Mo, 22.06.', building: 'Bibliothek', slot: 'Vormittag - 08:00 bis 13:00 Uhr' },
+  { room: 'H205', day: 'Di, 23.06.', building: 'Gebaeude H', slot: 'Ganzer Tag - 08:00 bis 18:00 Uhr' },
+  { room: 'Media-2', day: 'Do, 25.06.', building: 'Medienlabor', slot: 'Nachmittag - 13:00 bis 18:00 Uhr' },
 ];
 
 const time = (minutes: number) => `${Math.floor(minutes / 60).toString().padStart(2, '0')}:${(minutes % 60).toString().padStart(2, '0')}`;
 const overlaps = (bookings: Booking[], start: number, end: number) => bookings.some((booking) => start < booking.end && end > booking.start);
-const cloneRooms = (rooms: Room[]) => rooms.map((room) => ({ ...room, equipment: [...room.equipment], bookings: [...room.bookings] }));
-const availableOptions = (room: Room) => options.filter((option) => !overlaps(room.bookings, option.start, option.end));
-const optionFor = (booking: Booking | null) => options.find((option) => booking?.start === option.start && booking.end === option.end);
-const dateKey = (date: Date) => `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+const copyRooms = (rooms: Room[]) => rooms.map((room) => ({ ...room, bookings: [...room.bookings], equipment: [...room.equipment] }));
+const keyFor = (date: Date) => `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+const optionsFor = (room: Room) => slots.filter((slot) => !overlaps(room.bookings, slot.start, slot.end));
 
-const roomStatus = (room: Room, isToday: boolean): Status => {
-  const morning = overlaps(room.bookings, MORNING_START, AFTERNOON_START);
-  const afternoon = overlaps(room.bookings, AFTERNOON_START, DAY_END);
-  if (morning && afternoon) return 'full';
-  if (isToday && overlaps(room.bookings, NOW, NOW + 1)) return 'current';
-  if (morning || afternoon) return 'partial';
-  return 'free';
-};
-
-const availabilityText = (room: Room, isToday: boolean) => {
-  const available = availableOptions(room);
-  if (available.length === 0) return isToday ? 'Heute vollständig ausgebucht' : 'An diesem Tag ausgebucht';
-  if (available.length === 3) return 'Vormittag, Nachmittag oder ganztags buchbar';
-  return `Noch buchbar: ${available.map((option) => option.title).join(', ')}`;
-};
-
-const buildWorkdays = (): Workday[] => {
-  const days: Workday[] = [];
+function buildWorkdays() {
   const today = new Date();
   const cursor = new Date(today);
+  const days: Workday[] = [];
   let index = 0;
   while (days.length < 5) {
     const day = cursor.getDay();
     if (day !== 0 && day !== 6) {
-      const isToday = dateKey(cursor) === dateKey(today);
+      const isToday = keyFor(cursor) === keyFor(today);
       days.push({
-        key: dateKey(cursor),
-        label: isToday ? 'Heute' : weekdays[day],
-        shortLabel: weekdays[day],
-        dateText: `${cursor.getDate().toString().padStart(2, '0')}.${(cursor.getMonth() + 1).toString().padStart(2, '0')}.`,
+        key: keyFor(cursor),
+        label: isToday ? 'Heute' : week[day],
+        short: week[day],
+        date: `${cursor.getDate().toString().padStart(2, '0')}.${(cursor.getMonth() + 1).toString().padStart(2, '0')}.`,
         isToday,
         index,
       });
@@ -124,487 +103,314 @@ const buildWorkdays = (): Workday[] => {
     cursor.setDate(cursor.getDate() + 1);
   }
   return days;
-};
+}
 
-const roomsForWorkday = (day: Workday) => cloneRooms(day.isToday ? todayRooms : futureRoomSets[day.index % futureRoomSets.length]);
+function roomsFor(day: Workday) {
+  return copyRooms(day.isToday ? todayRooms : futureSets[day.index % futureSets.length]);
+}
+
+function statusFor(room: Room, isToday: boolean) {
+  const morning = overlaps(room.bookings, MORNING, AFTERNOON);
+  const afternoon = overlaps(room.bookings, AFTERNOON, END);
+  if (morning && afternoon) return 'full';
+  if (isToday && overlaps(room.bookings, NOW, NOW + 1)) return 'current';
+  if (morning || afternoon) return 'partial';
+  return 'free';
+}
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('home');
-  const [workdays] = useState(buildWorkdays);
+  const [days] = useState(buildWorkdays);
   const [selectedDayKey, setSelectedDayKey] = useState(() => buildWorkdays()[0].key);
-  const [rooms, setRooms] = useState(() => cloneRooms(todayRooms));
-  const [datePanelOpen, setDatePanelOpen] = useState(false);
+  const [rooms, setRooms] = useState(() => copyRooms(todayRooms));
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
-  const [selectedOptionId, setSelectedOptionId] = useState<OptionId | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<SlotId | null>(null);
+  const [showDays, setShowDays] = useState(false);
   const [bookedRoom, setBookedRoom] = useState<Room | null>(null);
   const [bookedSlot, setBookedSlot] = useState<Booking | null>(null);
-  const [loginId, setLoginId] = useState('');
+  const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const progress = useRef(new Animated.Value(0)).current;
-  const bounces = useRef([new Animated.Value(0), new Animated.Value(0), new Animated.Value(0)]).current;
-
-  const selectedDay = workdays.find((day) => day.key === selectedDayKey) ?? workdays[0];
+  const dots = useRef([new Animated.Value(0), new Animated.Value(0), new Animated.Value(0)]).current;
+  const selectedDay = days.find((day) => day.key === selectedDayKey) ?? days[0];
   const selectedRoom = rooms.find((room) => room.id === selectedRoomId) ?? null;
-  const selectedOption = options.find((option) => option.id === selectedOptionId) ?? null;
-  const currentAvailableOptions = selectedRoom ? availableOptions(selectedRoom) : [];
-  const freeRoomCount = rooms.filter((room) => roomStatus(room, selectedDay.isToday) === 'free').length;
+  const availableSlots = selectedRoom ? optionsFor(selectedRoom) : [];
+  const freeCount = rooms.filter((room) => statusFor(room, selectedDay.isToday) === 'free').length;
 
   useEffect(() => {
     if (screen !== 'loading') return;
     progress.setValue(0);
-    bounces.forEach((bounce) => bounce.setValue(0));
-    const bounceLoop = Animated.loop(
-      Animated.stagger(
-        130,
-        bounces.map((bounce) =>
-          Animated.sequence([
-            Animated.timing(bounce, { toValue: 1, duration: 330, useNativeDriver: true }),
-            Animated.timing(bounce, { toValue: 0, duration: 330, useNativeDriver: true }),
-          ]),
-        ),
-      ),
-    );
-    Animated.timing(progress, { toValue: 1, duration: 1850, useNativeDriver: false }).start();
-    bounceLoop.start();
+    dots.forEach((dot) => dot.setValue(0));
+    const loop = Animated.loop(Animated.stagger(120, dots.map((dot) => Animated.sequence([
+      Animated.timing(dot, { toValue: 1, duration: 320, useNativeDriver: true }),
+      Animated.timing(dot, { toValue: 0, duration: 320, useNativeDriver: true }),
+    ]))));
+    Animated.timing(progress, { toValue: 1, duration: 1800, useNativeDriver: false }).start();
+    loop.start();
     const timer = setTimeout(() => {
-      bounceLoop.stop();
+      loop.stop();
       setScreen('rooms');
     }, 2100);
     return () => {
-      bounceLoop.stop();
+      loop.stop();
       clearTimeout(timer);
     };
-  }, [bounces, progress, screen]);
+  }, [dots, progress, screen]);
 
-  const selectWorkday = (day: Workday) => {
-    setSelectedDayKey(day.key);
-    setRooms(roomsForWorkday(day));
+  const goRooms = () => {
     setSelectedRoomId(null);
-    setSelectedOptionId(null);
-    setDatePanelOpen(false);
+    setSelectedSlot(null);
+    setShowDays(false);
+    setScreen('rooms');
+  };
+
+  const selectDay = (day: Workday) => {
+    setSelectedDayKey(day.key);
+    setRooms(roomsFor(day));
+    setSelectedRoomId(null);
+    setSelectedSlot(null);
+    setShowDays(false);
   };
 
   const openRoom = (room: Room) => {
+    const first = optionsFor(room)[0];
     setSelectedRoomId(room.id);
-    setSelectedOptionId(availableOptions(room)[0]?.id ?? null);
+    setSelectedSlot(first?.id ?? null);
     setScreen('detail');
   };
 
   const bookRoom = () => {
-    if (!selectedRoom || !selectedOption) {
-      Alert.alert('Zeitraum auswählen', 'Bitte wähle zuerst einen freien Zeitraum.');
+    if (!selectedRoom || !selectedSlot) return;
+    const slot = slots.find((item) => item.id === selectedSlot);
+    if (!slot || overlaps(selectedRoom.bookings, slot.start, slot.end)) {
+      Alert.alert('Nicht verfuegbar', 'Dieser Zeitraum ist bereits belegt.');
       return;
     }
-    if (overlaps(selectedRoom.bookings, selectedOption.start, selectedOption.end)) {
-      Alert.alert('Nicht verfügbar', 'Dieser Zeitraum ist bereits belegt.');
-      return;
-    }
-    const booking = { start: selectedOption.start, end: selectedOption.end };
-    setRooms((current) => current.map((room) => (room.id === selectedRoom.id ? { ...room, bookings: [...room.bookings, booking] } : room)));
+    const booking = { start: slot.start, end: slot.end };
+    setRooms((current) => current.map((room) => room.id === selectedRoom.id ? { ...room, bookings: [...room.bookings, booking] } : room));
     setBookedRoom(selectedRoom);
     setBookedSlot(booking);
     setScreen('success');
   };
 
-  const goToRooms = () => {
-    setSelectedRoomId(null);
-    setSelectedOptionId(null);
-    setScreen('rooms');
-  };
-
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safe}>
       <StatusBar style="dark" />
-
-      {screen === 'home' && (
-        <View style={styles.homeScreen}>
-          <View style={styles.center}>
-            <StudyIcon />
-            <Text style={styles.homeTitle}>StudySpace</Text>
-            <Text style={styles.homeSubtitle}>Finde deinen freien Lernraum auf dem Campus.</Text>
-            <TouchableOpacity style={[styles.primaryButton, styles.homeButton]} onPress={() => setScreen('login')}>
-              <Text style={styles.primaryButtonText}>StudySpaces laden</Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.homeFooter}>Entwickelt in Kooperation mit HSNR FB03</Text>
-        </View>
-      )}
-
+      {screen === 'home' && <Home onStart={() => setScreen('login')} />}
       {screen === 'login' && (
-        <View style={styles.loginScreen}>
-          <View style={styles.brandBlock}>
-            <StudyIcon small />
-            <Text style={styles.appTitle}>StudySpace</Text>
-            <Text style={styles.subtitle}>Finde und buche freie Lernräume auf dem Campus</Text>
-          </View>
-          <View style={styles.formBlock}>
-            <TextInput value={loginId} onChangeText={setLoginId} placeholder="Matrikelnummer oder E-Mail" placeholderTextColor="#8a94a6" style={styles.input} autoCapitalize="none" keyboardType="email-address" />
-            <TextInput value={password} onChangeText={setPassword} placeholder="Passwort" placeholderTextColor="#8a94a6" style={styles.input} secureTextEntry />
-            <TouchableOpacity style={styles.primaryButton} onPress={() => setScreen('loading')}>
-              <Text style={styles.primaryButtonText}>Einloggen</Text>
-            </TouchableOpacity>
-          </View>
+        <View style={styles.login}>
+          <StudyIcon small />
+          <Text style={styles.appTitle}>StudySpace</Text>
+          <Text style={styles.sub}>Finde und buche freie Lernraeume auf dem Campus</Text>
+          <TextInput style={styles.input} placeholder="Matrikelnummer oder E-Mail" placeholderTextColor="#8a94a6" value={login} onChangeText={setLogin} />
+          <TextInput style={styles.input} placeholder="Passwort" placeholderTextColor="#8a94a6" secureTextEntry value={password} onChangeText={setPassword} />
+          <TouchableOpacity style={styles.primary} onPress={() => setScreen('loading')}><Text style={styles.primaryText}>Einloggen</Text></TouchableOpacity>
         </View>
       )}
-
-      {screen === 'loading' && <LoadingScreen bounces={bounces} progress={progress} />}
-
-      {screen === 'rooms' && (
-        <ScrollView style={styles.screen} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          <View style={styles.header}>
-            <Text style={styles.kicker}>{selectedDay.isToday ? `Campus heute · Jetzt ${time(NOW)} Uhr` : `Campus ${selectedDay.shortLabel}. ${selectedDay.dateText}`}</Text>
-            <Text style={styles.pageTitle}>Freie Lernräume</Text>
-            <Text style={styles.helperText}>{freeRoomCount} Räume sind {selectedDay.isToday ? 'aktuell direkt frei' : 'für diesen Tag komplett frei'}</Text>
-          </View>
-          <View style={styles.legendRow}>
-            <LegendDot color={colors.green} label="frei" />
-            <LegendDot color={colors.gray} label={selectedDay.isToday ? 'gerade belegt' : 'teilweise reserviert'} />
-            <LegendDot color={colors.red} label="ausgebucht" />
-          </View>
-          <View style={styles.roomList}>
-            {rooms.map((room) => {
-              const status = roomStatus(room, selectedDay.isToday);
-              const label = status === 'free' ? 'Frei' : status === 'current' ? 'Gerade belegt' : status === 'partial' ? 'Teilweise frei' : 'Ausgebucht';
-              return (
-                <TouchableOpacity key={room.id} activeOpacity={0.85} style={[styles.roomCard, (status === 'current' || status === 'partial') && styles.currentCard, status === 'full' && styles.fullCard]} onPress={() => openRoom(room)}>
-                  <View style={styles.cardTopRow}>
-                    <View style={styles.cardTitleBlock}>
-                      <Text style={[styles.roomName, status !== 'free' && styles.mutedText]}>{room.name}</Text>
-                      <Text style={styles.roomLocation}>{room.building} · {room.floor}</Text>
-                    </View>
-                    <StatusBadge status={status} label={label} />
-                  </View>
-                  <Text style={styles.cardMeta}>{room.capacity} Plätze · halb- oder ganztags</Text>
-                  <Text style={styles.availabilityText}>{availabilityText(room, selectedDay.isToday)}</Text>
-                  <View style={styles.chipRow}>{room.equipment.slice(0, 3).map((item) => <Chip key={item} label={item} />)}</View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </ScrollView>
-      )}
-
+      {screen === 'loading' && <Loading dots={dots} progress={progress} />}
       {screen === 'rooms' && (
         <>
-          <TouchableOpacity style={styles.floatingCalendarButton} activeOpacity={0.88} onPress={() => setDatePanelOpen(true)}>
-            <Text style={styles.floatingCalendarIcon}>▦</Text>
-            <Text style={styles.floatingCalendarText}>Tage</Text>
+          <ScrollView style={styles.screen} contentContainerStyle={styles.scroll}>
+            <Text style={styles.kicker}>{selectedDay.isToday ? `Campus heute - Jetzt ${time(NOW)} Uhr` : `Campus ${selectedDay.short}. ${selectedDay.date}`}</Text>
+            <Text style={styles.title}>Freie Lernraeume</Text>
+            <Text style={styles.sub}>{freeCount} Raeume sind {selectedDay.isToday ? 'aktuell direkt frei' : 'fuer diesen Tag komplett frei'}</Text>
+            <View style={styles.legend}><Legend color={c.green} text="frei" /><Legend color={c.gray} text={selectedDay.isToday ? 'gerade belegt' : 'teilweise reserviert'} /><Legend color={c.red} text="ausgebucht" /></View>
+            {rooms.map((room) => {
+              const status = statusFor(room, selectedDay.isToday);
+              const label = status === 'free' ? 'Frei' : status === 'current' ? 'Gerade belegt' : status === 'partial' ? 'Teilweise frei' : 'Ausgebucht';
+              return <RoomCard key={room.id} room={room} status={status} label={label} isToday={selectedDay.isToday} onPress={() => openRoom(room)} />;
+            })}
+          </ScrollView>
+          <TouchableOpacity style={styles.profileBtn} onPress={() => setScreen('profile')}>
+            <View style={styles.avatar}><Text style={styles.avatarText}>MS</Text></View><Text style={styles.profileBtnText}>Profile</Text>
           </TouchableOpacity>
-          {datePanelOpen && (
-            <View style={styles.panelOverlay}>
-              <TouchableOpacity style={styles.panelBackdrop} activeOpacity={1} onPress={() => setDatePanelOpen(false)} />
-              <View style={styles.datePanel}>
-                <View style={styles.panelHeader}>
-                  <View>
-                    <Text style={styles.panelKicker}>Arbeitswoche</Text>
-                    <Text style={styles.panelTitle}>Freie Tage wählen</Text>
-                  </View>
-                  <TouchableOpacity style={styles.closeButton} onPress={() => setDatePanelOpen(false)}>
-                    <Text style={styles.closeButtonText}>×</Text>
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.calendarGrid}>
-                  {workdays.map((day) => {
-                    const active = selectedDayKey === day.key;
-                    const dayFreeRooms = roomsForWorkday(day).filter((room) => roomStatus(room, day.isToday) === 'free').length;
-                    return (
-                      <TouchableOpacity key={day.key} activeOpacity={0.86} style={[styles.dayTile, active && styles.dayTileActive]} onPress={() => selectWorkday(day)}>
-                        <Text style={[styles.dayLabel, active && styles.dayLabelActive]}>{day.label}</Text>
-                        <Text style={[styles.dayDate, active && styles.dayDateActive]}>{day.dateText}</Text>
-                        <Text style={[styles.dayMeta, active && styles.dayMetaActive]}>{dayFreeRooms} frei</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-                <View style={styles.campusFooter}>
-                  <Text style={styles.campusLabel}>Aktueller Campus</Text>
-                  <Text style={styles.campusValue}>HSNR Campus MG</Text>
-                </View>
-              </View>
-            </View>
-          )}
+          <TouchableOpacity style={styles.dayButton} onPress={() => setShowDays(true)}><Text style={styles.dayButtonText}>Tage</Text></TouchableOpacity>
+          {showDays && <DayPanel days={days} selectedKey={selectedDayKey} onClose={() => setShowDays(false)} onPick={selectDay} />}
         </>
       )}
-
       {screen === 'detail' && selectedRoom && (
-        <ScrollView style={styles.screen} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          <TouchableOpacity style={styles.backButton} onPress={goToRooms}><Text style={styles.backButtonText}>Zurück</Text></TouchableOpacity>
-          <View style={styles.detailHero}>
-            <StatusBadge status={roomStatus(selectedRoom, selectedDay.isToday)} label={roomStatus(selectedRoom, selectedDay.isToday) === 'free' ? (selectedDay.isToday ? 'Jetzt frei' : 'Frei buchbar') : roomStatus(selectedRoom, selectedDay.isToday) === 'current' ? 'Gerade belegt' : roomStatus(selectedRoom, selectedDay.isToday) === 'partial' ? 'Teilweise frei' : 'Ausgebucht'} />
-            <Text style={styles.detailTitle}>{selectedRoom.name}</Text>
-            <Text style={styles.detailSubtitle}>{selectedRoom.building} · {selectedRoom.floor}</Text>
-          </View>
-          <View style={styles.infoGrid}>
-            <InfoBox label="Kapazität" value={`${selectedRoom.capacity} Plätze`} />
-            <InfoBox label="Buchungsfenster" value="08:00 - 18:00 Uhr" />
-          </View>
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Zeitraum wählen</Text>
-            {currentAvailableOptions.length === 0 ? (
-              <View style={styles.emptySlots}><Text style={styles.emptySlotsText}>Dieser Raum ist an diesem Tag vollständig ausgebucht.</Text></View>
-            ) : (
-              <View style={styles.optionList}>
-                {options.map((option) => {
-                  const available = !overlaps(selectedRoom.bookings, option.start, option.end);
-                  const active = selectedOptionId === option.id;
-                  return (
-                    <TouchableOpacity key={option.id} disabled={!available} activeOpacity={available ? 0.85 : 1} style={[styles.bookingOption, active && styles.bookingOptionActive, !available && styles.bookingOptionDisabled]} onPress={() => setSelectedOptionId(option.id)}>
-                      <View style={styles.optionTextBlock}>
-                        <Text style={[styles.bookingOptionTitle, active && styles.bookingOptionTitleActive, !available && styles.disabledText]}>{option.title}</Text>
-                        <Text style={[styles.bookingOptionSubtitle, active && styles.bookingOptionSubtitleActive, !available && styles.disabledText]}>{option.subtitle}</Text>
-                      </View>
-                      <View style={[styles.optionPill, active && styles.optionPillActive]}>
-                        <Text style={[styles.optionPillText, active && styles.optionPillTextActive, !available && styles.disabledText]}>{available ? 'frei' : 'belegt'}</Text>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            )}
-          </View>
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Ausstattung</Text>
-            <View style={styles.detailChipRow}>{selectedRoom.equipment.map((item) => <Chip key={item} label={item} large />)}</View>
-          </View>
-          <TouchableOpacity style={[styles.primaryButton, currentAvailableOptions.length === 0 && styles.disabledButton]} onPress={bookRoom}>
-            <Text style={styles.primaryButtonText}>Raum buchen</Text>
-          </TouchableOpacity>
+        <ScrollView style={styles.screen} contentContainerStyle={styles.scroll}>
+          <Back onPress={goRooms} />
+          <View style={styles.hero}><Badge status={statusFor(selectedRoom, selectedDay.isToday)} label={selectedRoom.name} /><Text style={styles.heroTitle}>{selectedRoom.building}</Text><Text style={styles.heroSub}>{selectedRoom.floor} - {selectedRoom.capacity} Plaetze</Text></View>
+          <Text style={styles.sectionTitle}>Zeitraum waehlen</Text>
+          {availableSlots.length === 0 ? <Text style={styles.empty}>Dieser Raum ist an diesem Tag vollstaendig ausgebucht.</Text> : slots.map((slot) => {
+            const free = !overlaps(selectedRoom.bookings, slot.start, slot.end);
+            const active = selectedSlot === slot.id;
+            return <TouchableOpacity key={slot.id} disabled={!free} style={[styles.slot, active && styles.slotActive, !free && styles.disabled]} onPress={() => setSelectedSlot(slot.id)}><View><Text style={styles.slotTitle}>{slot.title}</Text><Text style={styles.slotSub}>{slot.subtitle}</Text></View><Text style={styles.slotPill}>{free ? 'frei' : 'belegt'}</Text></TouchableOpacity>;
+          })}
+          <Text style={styles.sectionTitle}>Ausstattung</Text>
+          <View style={styles.chips}>{selectedRoom.equipment.map((item) => <Chip key={item} text={item} />)}</View>
+          <TouchableOpacity style={[styles.primary, availableSlots.length === 0 && styles.disabled]} onPress={bookRoom}><Text style={styles.primaryText}>Raum buchen</Text></TouchableOpacity>
         </ScrollView>
       )}
-
       {screen === 'success' && bookedRoom && bookedSlot && (
-        <View style={styles.successScreen}>
-          <View style={styles.successMark}><Text style={styles.successMarkText}>✓</Text></View>
-          <Text style={styles.successTitle}>Deine Buchung wurde bestätigt</Text>
-          <Text style={styles.successSubtitle}>{bookedRoom.name} ist {optionFor(bookedSlot)?.title.toLowerCase()} von {time(bookedSlot.start)} bis {time(bookedSlot.end)} Uhr für dich reserviert.</Text>
-          <TouchableOpacity style={styles.primaryButton} onPress={goToRooms}>
-            <Text style={styles.primaryButtonText}>Zurück zur Übersicht</Text>
-          </TouchableOpacity>
-        </View>
+        <View style={styles.success}><Text style={styles.check}>OK</Text><Text style={styles.title}>Deine Buchung wurde bestaetigt</Text><Text style={styles.sub}>{bookedRoom.name} ist von {time(bookedSlot.start)} bis {time(bookedSlot.end)} Uhr reserviert.</Text><TouchableOpacity style={styles.primary} onPress={goRooms}><Text style={styles.primaryText}>Zurueck zur Uebersicht</Text></TouchableOpacity></View>
       )}
+      {screen === 'profile' && <ProfileMenu onBack={goRooms} onData={() => setScreen('profileData')} onBookings={() => setScreen('bookings')} />}
+      {screen === 'profileData' && <ProfileData onBack={() => setScreen('profile')} />}
+      {screen === 'bookings' && <Bookings onBack={() => setScreen('profile')} />}
     </SafeAreaView>
   );
 }
 
+function Home({ onStart }: { onStart: () => void }) {
+  return <View style={styles.home}><View style={styles.center}><StudyIcon /><Text style={styles.homeTitle}>StudySpace</Text><Text style={styles.sub}>Finde deinen freien Lernraum auf dem Campus.</Text><TouchableOpacity style={styles.primary} onPress={onStart}><Text style={styles.primaryText}>StudySpaces laden</Text></TouchableOpacity></View><Text style={styles.footer}>Entwickelt in Kooperation mit HSNR FB03</Text></View>;
+}
+
 function StudyIcon({ small }: { small?: boolean }) {
-  return (
-    <View style={[styles.studyIcon, small && styles.studyIconSmall]}>
-      <View style={styles.iconBuilding}>
-        <View style={styles.iconWindowRow}><View style={styles.iconWindow} /><View style={styles.iconWindow} /></View>
-        <View style={styles.iconDoor} />
-      </View>
-      <View style={styles.iconBook}><View style={styles.iconBookLine} /><View style={styles.iconBookLineShort} /></View>
-    </View>
-  );
+  return <View style={[styles.icon, small && styles.iconSmall]}><View style={styles.iconBuilding}><View style={styles.windowRow}><View style={styles.window} /><View style={styles.window} /></View><View style={styles.door} /></View><View style={styles.book}><View style={styles.bookLine} /><View style={styles.bookLineShort} /></View></View>;
 }
 
-function LoadingScreen({ bounces, progress }: { bounces: Animated.Value[]; progress: Animated.Value }) {
-  return (
-    <View style={styles.loadingScreen}>
-      <View style={styles.center}>
-        <Text style={styles.loadingKicker}>Campusdaten werden vorbereitet</Text>
-        <Text style={styles.loadingTitle}>StudySpaces laden</Text>
-        <Text style={styles.loadingSubtitle}>Räume, Zeitfenster und Verfügbarkeit werden lokal geladen.</Text>
-        <View style={styles.uniIconRail}>
-          <UniIcon animation={bounces[0]} label="Bibliothek" type="book" />
-          <UniIcon animation={bounces[1]} label="Lernen" type="pencil" featured />
-          <UniIcon animation={bounces[2]} label="Räume" type="room" />
-        </View>
-        <View style={styles.bouncingDots}>
-          {bounces.map((bounce, index) => (
-            <Animated.View key={index} style={[styles.loadingDot, { opacity: bounce.interpolate({ inputRange: [0, 1], outputRange: [0.45, 1] }), transform: [{ translateY: bounce.interpolate({ inputRange: [0, 1], outputRange: [0, -10] }) }] }]} />
-          ))}
-        </View>
-        <View style={styles.loadingTrack}>
-          <Animated.View style={[styles.loadingFill, { width: progress.interpolate({ inputRange: [0, 1], outputRange: ['8%', '100%'] }) }]} />
-        </View>
-      </View>
-    </View>
-  );
+function Loading({ dots, progress }: { dots: Animated.Value[]; progress: Animated.Value }) {
+  return <View style={styles.loading}><Text style={styles.kicker}>Campusdaten werden vorbereitet</Text><Text style={styles.title}>StudySpaces laden</Text><Text style={styles.sub}>Raeume, Zeitfenster und Verfuegbarkeit werden lokal geladen.</Text><View style={styles.loadingIcons}>{['Buch', 'Stift', 'Raum'].map((label, index) => <Animated.View key={label} style={[styles.loadingCard, { transform: [{ translateY: dots[index].interpolate({ inputRange: [0, 1], outputRange: [0, -12] }) }] }]}><Text style={styles.loadingIcon}>{label}</Text></Animated.View>)}</View><View style={styles.dotRow}>{dots.map((dot, index) => <Animated.View key={index} style={[styles.dot, { opacity: dot.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) }]} />)}</View><View style={styles.track}><Animated.View style={[styles.fill, { width: progress.interpolate({ inputRange: [0, 1], outputRange: ['8%', '100%'] }) }]} /></View></View>;
 }
 
-function UniIcon({ animation, label, type, featured }: { animation: Animated.Value; label: string; type: 'book' | 'pencil' | 'room'; featured?: boolean }) {
-  return (
-    <Animated.View style={[styles.uniIconCard, featured && styles.uniIconCardFeatured, { transform: [{ translateY: animation.interpolate({ inputRange: [0, 1], outputRange: [0, featured ? -16 : -12] }) }] }]}>
-      {type === 'book' && <View style={styles.bookIcon}><View style={styles.bookPage} /><View style={styles.bookPage} /></View>}
-      {type === 'pencil' && <View style={styles.pencilIcon}><View style={styles.pencilBody} /><View style={styles.pencilTip} /></View>}
-      {type === 'room' && <View style={styles.roomIcon}><View style={styles.roomIconBoard} /><View style={styles.roomIconTable} /></View>}
-      <Text style={[styles.uniIconLabel, featured && styles.uniIconLabelFeatured]}>{label}</Text>
-    </Animated.View>
-  );
+function RoomCard({ room, status, label, isToday, onPress }: { room: Room; status: string; label: string; isToday: boolean; onPress: () => void }) {
+  const available = optionsFor(room);
+  const text = available.length === 0 ? (isToday ? 'Heute ausgebucht' : 'An diesem Tag ausgebucht') : available.length === 3 ? 'Vormittag, Nachmittag oder ganztags buchbar' : `Noch buchbar: ${available.map((slot) => slot.title).join(', ')}`;
+  return <TouchableOpacity style={[styles.card, status !== 'free' && styles.mutedCard, status === 'full' && styles.fullCard]} onPress={onPress}><View style={styles.row}><View style={styles.grow}><Text style={styles.roomName}>{room.name}</Text><Text style={styles.meta}>{room.building} - {room.floor}</Text></View><Badge status={status} label={label} /></View><Text style={styles.cardMeta}>{room.capacity} Plaetze - halb- oder ganztags</Text><Text style={styles.meta}>{text}</Text><View style={styles.chips}>{room.equipment.slice(0, 3).map((item) => <Chip key={item} text={item} />)}</View></TouchableOpacity>;
 }
 
-function StatusBadge({ status, label }: { status: Status; label: string }) {
-  return (
-    <View style={[styles.statusBadge, status === 'free' && styles.freeBadge, (status === 'current' || status === 'partial') && styles.currentBadge, status === 'full' && styles.fullBadge]}>
-      <Text style={[styles.statusText, status === 'free' && styles.freeText, (status === 'current' || status === 'partial') && styles.currentText, status === 'full' && styles.fullText]}>{label}</Text>
-    </View>
-  );
+function DayPanel({ days, selectedKey, onPick, onClose }: { days: Workday[]; selectedKey: string; onPick: (day: Workday) => void; onClose: () => void }) {
+  return <View style={styles.overlay}><TouchableOpacity style={styles.backdrop} onPress={onClose} /><View style={styles.panel}><View style={styles.row}><View><Text style={styles.kicker}>Arbeitswoche</Text><Text style={styles.panelTitle}>Freie Tage waehlen</Text></View><TouchableOpacity style={styles.close} onPress={onClose}><Text style={styles.closeText}>x</Text></TouchableOpacity></View><View style={styles.dayGrid}>{days.map((day) => { const active = selectedKey === day.key; const count = roomsFor(day).filter((room) => statusFor(room, day.isToday) === 'free').length; return <TouchableOpacity key={day.key} style={[styles.dayTile, active && styles.dayTileActive]} onPress={() => onPick(day)}><Text style={[styles.dayLabel, active && styles.white]}>{day.label}</Text><Text style={[styles.dayDate, active && styles.white]}>{day.date}</Text><Text style={[styles.dayCount, active && styles.white]}>{count} frei</Text></TouchableOpacity>; })}</View><View style={styles.campus}><Text style={styles.meta}>Aktueller Campus</Text><Text style={styles.campusText}>HSNR Campus MG</Text></View></View></View>;
 }
 
-function LegendDot({ color, label }: { color: string; label: string }) {
-  return <><View style={[styles.legendDot, { backgroundColor: color }]} /><Text style={styles.legendText}>{label}</Text></>;
+function ProfileMenu({ onBack, onData, onBookings }: { onBack: () => void; onData: () => void; onBookings: () => void }) {
+  return <ScrollView style={styles.screen} contentContainerStyle={styles.scroll}><Back onPress={onBack} /><View style={styles.profileHero}><View style={styles.bigAvatar}><Text style={styles.bigAvatarText}>MS</Text></View><Text style={styles.heroTitle}>Mira Schneider</Text><Text style={styles.heroSub}>Studentin - BBW - HSNR Campus MG</Text></View><ProfileAction title="Profildaten" sub="Matrikelnummer, Campus und Zugang anzeigen" onPress={onData} /><ProfileAction title="Meine Buchungen" sub="Gebuchte Raeume und Tage ansehen" onPress={onBookings} /></ScrollView>;
 }
 
-function InfoBox({ label, value }: { label: string; value: string }) {
-  return <View style={styles.infoBox}><Text style={styles.infoLabel}>{label}</Text><Text style={styles.infoValue}>{value}</Text></View>;
+function ProfileAction({ title, sub, onPress }: { title: string; sub: string; onPress: () => void }) {
+  return <TouchableOpacity style={styles.profileAction} onPress={onPress}><Text style={styles.actionIcon}>{title === 'Profildaten' ? 'ID' : 'BK'}</Text><View style={styles.grow}><Text style={styles.actionTitle}>{title}</Text><Text style={styles.meta}>{sub}</Text></View><Text style={styles.arrow}>›</Text></TouchableOpacity>;
 }
 
-function Chip({ label, large }: { label: string; large?: boolean }) {
-  return <View style={large ? styles.detailChip : styles.smallChip}><Text style={large ? styles.detailChipText : styles.smallChipText}>{label}</Text></View>;
+function ProfileData({ onBack }: { onBack: () => void }) {
+  return <ScrollView style={styles.screen} contentContainerStyle={styles.scroll}><Back onPress={onBack} /><Text style={styles.title}>Profildaten</Text><Text style={styles.sub}>Deine hinterlegten Testdaten fuer den StudySpace-PoC.</Text>{profileRows.map(([label, value]) => <View style={styles.dataRow} key={label}><Text style={styles.dataLabel}>{label}</Text><Text style={styles.dataValue}>{value}</Text></View>)}<View style={styles.hint}><Text style={styles.actionTitle}>Hinweis zum Zugang</Text><Text style={styles.meta}>Der Zugang wird erweitert bei Verlaengerung der Kooperation mit der Hochschule.</Text></View></ScrollView>;
 }
 
-const colors = {
-  navy: '#0b1f3a',
-  navySoft: '#14345c',
-  green: '#19a66a',
-  greenSoft: '#e8f8f0',
-  gray: '#64748b',
-  graySoft: '#eef2f7',
-  mint: '#dff8ec',
-  red: '#b33a3a',
-  redSoft: '#fdecec',
-  background: '#f4f7fb',
-  card: '#ffffff',
-  text: '#102033',
-  muted: '#6b778c',
-  border: '#e3e9f2',
-};
+function Bookings({ onBack }: { onBack: () => void }) {
+  return <ScrollView style={styles.screen} contentContainerStyle={styles.scroll}><Back onPress={onBack} /><Text style={styles.title}>Meine Buchungen</Text><Text style={styles.sub}>Eine lokale Testliste deiner gebuchten Lernraeume.</Text>{profileBookings.map((booking) => <View style={styles.bookingCard} key={`${booking.room}-${booking.day}`}><Text style={styles.roomName}>{booking.room}</Text><Text style={styles.meta}>{booking.building}</Text><View style={styles.bookingDate}><Text style={styles.dayCount}>{booking.day}</Text><Text style={styles.cardMeta}>{booking.slot}</Text></View></View>)}</ScrollView>;
+}
+
+function Back({ onPress }: { onPress: () => void }) {
+  return <TouchableOpacity style={styles.back} onPress={onPress}><Text style={styles.backText}>Zurueck</Text></TouchableOpacity>;
+}
+
+function Badge({ status, label }: { status: string; label: string }) {
+  return <View style={[styles.badge, status === 'free' && styles.freeBadge, (status === 'current' || status === 'partial') && styles.grayBadge, status === 'full' && styles.redBadge]}><Text style={[styles.badgeText, status === 'free' && styles.greenText, status === 'full' && styles.redText]}>{label}</Text></View>;
+}
+
+function Chip({ text }: { text: string }) {
+  return <View style={styles.chip}><Text style={styles.chipText}>{text}</Text></View>;
+}
+
+function Legend({ color, text }: { color: string; text: string }) {
+  return <View style={styles.legendItem}><View style={[styles.legendDot, { backgroundColor: color }]} /><Text style={styles.legendText}>{text}</Text></View>;
+}
+
+const c = { navy: '#0b1f3a', green: '#19a66a', red: '#b33a3a', gray: '#64748b', bg: '#f4f7fb', card: '#ffffff', text: '#102033', muted: '#6b778c', border: '#e3e9f2', greenSoft: '#e8f8f0', redSoft: '#fdecec', graySoft: '#eef2f7' };
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.background },
+  safe: { flex: 1, backgroundColor: c.bg },
   screen: { flex: 1 },
-  homeScreen: { flex: 1, padding: 24, backgroundColor: colors.background },
-  loginScreen: { flex: 1, justifyContent: 'center', padding: 24 },
-  loadingScreen: { flex: 1, padding: 24, backgroundColor: colors.background },
+  scroll: { padding: 22, paddingBottom: 112 },
+  home: { flex: 1, padding: 24 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  homeFooter: { alignSelf: 'flex-end', color: colors.muted, fontSize: 12, fontWeight: '700', textAlign: 'right' },
-  studyIcon: { width: 112, height: 112, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 24, backgroundColor: colors.navy, shadowColor: colors.navy, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.2, shadowRadius: 18, elevation: 6 },
-  studyIconSmall: { transform: [{ scale: 0.78 }], marginBottom: 10 },
-  iconBuilding: { width: 52, height: 58, borderTopLeftRadius: 12, borderTopRightRadius: 12, alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, backgroundColor: '#ffffff' },
-  iconWindowRow: { flexDirection: 'row', gap: 7 },
-  iconWindow: { width: 10, height: 10, borderRadius: 3, backgroundColor: colors.green },
-  iconDoor: { width: 18, height: 24, borderTopLeftRadius: 7, borderTopRightRadius: 7, backgroundColor: colors.navy },
-  iconBook: { position: 'absolute', right: 22, bottom: 20, width: 34, height: 22, borderRadius: 7, paddingHorizontal: 7, paddingVertical: 5, backgroundColor: colors.green },
-  iconBookLine: { height: 3, borderRadius: 99, marginBottom: 5, backgroundColor: '#ffffff' },
-  iconBookLineShort: { width: 13, height: 3, borderRadius: 99, backgroundColor: '#ffffff' },
-  homeTitle: { color: colors.navy, fontSize: 40, fontWeight: '900', letterSpacing: 0 },
-  homeSubtitle: { maxWidth: 300, marginTop: 10, marginBottom: 34, color: colors.muted, fontSize: 17, lineHeight: 24, textAlign: 'center' },
-  homeButton: { width: '100%', maxWidth: 320 },
-  brandBlock: { alignItems: 'center', marginBottom: 42 },
-  appTitle: { color: colors.navy, fontSize: 38, fontWeight: '800', letterSpacing: 0 },
-  subtitle: { maxWidth: 310, marginTop: 10, color: colors.muted, fontSize: 16, lineHeight: 23, textAlign: 'center' },
-  formBlock: { gap: 14 },
-  input: { height: 56, borderRadius: 16, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 18, backgroundColor: colors.card, color: colors.text, fontSize: 16 },
-  primaryButton: { minHeight: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginTop: 8, paddingHorizontal: 18, backgroundColor: colors.navy, shadowColor: colors.navy, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.16, shadowRadius: 14, elevation: 4 },
-  primaryButtonText: { color: '#ffffff', fontSize: 16, fontWeight: '800' },
-  loadingKicker: { color: colors.green, fontSize: 13, fontWeight: '900', textTransform: 'uppercase' },
-  loadingTitle: { marginTop: 10, color: colors.navy, fontSize: 34, fontWeight: '900', textAlign: 'center' },
-  loadingSubtitle: { maxWidth: 310, marginTop: 10, color: colors.muted, fontSize: 16, lineHeight: 23, textAlign: 'center' },
-  uniIconRail: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 42, marginBottom: 34 },
-  uniIconCard: { width: 92, minHeight: 108, borderRadius: 22, alignItems: 'center', justifyContent: 'center', padding: 12, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, shadowColor: '#1b2a41', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.08, shadowRadius: 16, elevation: 3 },
-  uniIconCardFeatured: { backgroundColor: colors.mint, borderColor: '#b7efd3' },
-  uniIconLabel: { marginTop: 10, color: colors.navySoft, fontSize: 12, fontWeight: '900' },
-  uniIconLabelFeatured: { color: colors.green },
-  bookIcon: { flexDirection: 'row', gap: 3 },
-  bookPage: { width: 18, height: 30, borderRadius: 5, borderWidth: 2, borderColor: colors.green, backgroundColor: '#ffffff' },
-  pencilIcon: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '-24deg' }] },
-  pencilBody: { width: 12, height: 34, borderRadius: 6, backgroundColor: colors.green },
-  pencilTip: { width: 0, height: 0, borderLeftWidth: 7, borderRightWidth: 7, borderTopWidth: 10, borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: '#ffffff', marginTop: -1 },
-  roomIcon: { width: 42, height: 38, alignItems: 'center', justifyContent: 'center' },
-  roomIconBoard: { width: 38, height: 20, borderRadius: 6, borderWidth: 2, borderColor: colors.green, backgroundColor: colors.greenSoft },
-  roomIconTable: { width: 28, height: 7, borderRadius: 99, marginTop: 5, backgroundColor: colors.navy },
-  bouncingDots: { flexDirection: 'row', gap: 10, height: 28, alignItems: 'flex-end', justifyContent: 'center' },
-  loadingDot: { width: 11, height: 11, borderRadius: 99, backgroundColor: colors.green },
-  loadingTrack: { width: '78%', maxWidth: 260, height: 9, borderRadius: 99, overflow: 'hidden', marginTop: 22, backgroundColor: '#dde6f1' },
-  loadingFill: { height: 9, borderRadius: 99, backgroundColor: colors.green },
-  scrollContent: { padding: 22, paddingBottom: 112 },
-  header: { marginBottom: 16 },
-  kicker: { marginBottom: 6, color: colors.green, fontSize: 14, fontWeight: '800', textTransform: 'uppercase' },
-  pageTitle: { color: colors.navy, fontSize: 34, fontWeight: '800' },
-  helperText: { marginTop: 8, color: colors.muted, fontSize: 16 },
-  legendRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 18 },
+  login: { flex: 1, justifyContent: 'center', padding: 24 },
+  footer: { alignSelf: 'flex-end', color: c.muted, fontSize: 12, fontWeight: '700', textAlign: 'right' },
+  icon: { width: 112, height: 112, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 24, backgroundColor: c.navy, shadowColor: c.navy, shadowOpacity: 0.2, shadowRadius: 18, elevation: 6 },
+  iconSmall: { transform: [{ scale: 0.78 }], marginBottom: 10 },
+  iconBuilding: { width: 52, height: 58, borderTopLeftRadius: 12, borderTopRightRadius: 12, alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, backgroundColor: '#fff' },
+  windowRow: { flexDirection: 'row', gap: 7 },
+  window: { width: 10, height: 10, borderRadius: 3, backgroundColor: c.green },
+  door: { width: 18, height: 24, borderTopLeftRadius: 7, borderTopRightRadius: 7, backgroundColor: c.navy },
+  book: { position: 'absolute', right: 22, bottom: 20, width: 34, height: 22, borderRadius: 7, padding: 6, backgroundColor: c.green },
+  bookLine: { height: 3, borderRadius: 99, marginBottom: 5, backgroundColor: '#fff' },
+  bookLineShort: { width: 13, height: 3, borderRadius: 99, backgroundColor: '#fff' },
+  homeTitle: { color: c.navy, fontSize: 40, fontWeight: '900' },
+  appTitle: { color: c.navy, fontSize: 38, fontWeight: '900', textAlign: 'center' },
+  title: { color: c.navy, fontSize: 34, fontWeight: '900' },
+  sub: { marginTop: 8, marginBottom: 16, color: c.muted, fontSize: 16, lineHeight: 23, textAlign: 'center' },
+  kicker: { marginBottom: 6, color: c.green, fontSize: 13, fontWeight: '900', textTransform: 'uppercase' },
+  input: { height: 56, borderRadius: 16, borderWidth: 1, borderColor: c.border, paddingHorizontal: 18, marginBottom: 14, backgroundColor: c.card, color: c.text, fontSize: 16 },
+  primary: { minHeight: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginTop: 8, paddingHorizontal: 18, backgroundColor: c.navy, shadowColor: c.navy, shadowOpacity: 0.16, shadowRadius: 14, elevation: 4 },
+  primaryText: { color: '#fff', fontSize: 16, fontWeight: '900' },
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+  loadingIcons: { flexDirection: 'row', gap: 12, marginTop: 36, marginBottom: 26 },
+  loadingCard: { width: 88, height: 98, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: c.card, borderWidth: 1, borderColor: c.border },
+  loadingIcon: { color: c.green, fontSize: 14, fontWeight: '900' },
+  dotRow: { flexDirection: 'row', gap: 10, height: 20 },
+  dot: { width: 11, height: 11, borderRadius: 99, backgroundColor: c.green },
+  track: { width: '78%', maxWidth: 260, height: 9, borderRadius: 99, overflow: 'hidden', marginTop: 22, backgroundColor: '#dde6f1' },
+  fill: { height: 9, borderRadius: 99, backgroundColor: c.green },
+  legend: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 18 },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   legendDot: { width: 10, height: 10, borderRadius: 99 },
-  legendText: { marginRight: 8, color: colors.muted, fontSize: 13, fontWeight: '700' },
-  roomList: { gap: 14 },
-  roomCard: { borderRadius: 20, borderWidth: 1, borderColor: colors.border, padding: 18, backgroundColor: colors.card, shadowColor: '#1b2a41', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.08, shadowRadius: 18, elevation: 3 },
-  currentCard: { borderColor: '#d7dee9', backgroundColor: '#f8fafc', opacity: 0.78 },
-  fullCard: { borderColor: '#f2c4c4', backgroundColor: '#fff6f6', opacity: 0.72 },
-  cardTopRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 },
-  cardTitleBlock: { flex: 1 },
-  roomName: { color: colors.text, fontSize: 24, fontWeight: '800' },
-  mutedText: { color: '#4d5868' },
-  roomLocation: { marginTop: 4, color: colors.muted, fontSize: 14 },
-  statusBadge: { borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7 },
-  freeBadge: { backgroundColor: colors.greenSoft },
-  currentBadge: { backgroundColor: colors.graySoft },
-  fullBadge: { backgroundColor: colors.redSoft },
-  statusText: { fontSize: 13, fontWeight: '800' },
-  freeText: { color: colors.green },
-  currentText: { color: colors.gray },
-  fullText: { color: colors.red },
-  cardMeta: { marginTop: 14, color: colors.navySoft, fontSize: 15, fontWeight: '700' },
-  availabilityText: { marginTop: 6, color: colors.muted, fontSize: 14, fontWeight: '600' },
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 },
-  smallChip: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6, backgroundColor: '#eef3f8' },
-  smallChipText: { color: colors.navySoft, fontSize: 12, fontWeight: '700' },
-  backButton: { alignSelf: 'flex-start', borderRadius: 999, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 18, backgroundColor: '#e8eef6' },
-  backButtonText: { color: colors.navy, fontSize: 14, fontWeight: '800' },
-  detailHero: { borderRadius: 24, padding: 22, backgroundColor: colors.navy },
-  detailTitle: { marginTop: 22, color: '#ffffff', fontSize: 42, fontWeight: '800' },
-  detailSubtitle: { marginTop: 8, color: '#c8d5e5', fontSize: 17, fontWeight: '600' },
-  infoGrid: { gap: 12, marginTop: 16 },
-  infoBox: { borderRadius: 18, borderWidth: 1, borderColor: colors.border, padding: 18, backgroundColor: colors.card },
-  infoLabel: { color: colors.muted, fontSize: 13, fontWeight: '800', textTransform: 'uppercase' },
-  infoValue: { marginTop: 8, color: colors.text, fontSize: 18, fontWeight: '800' },
-  section: { marginTop: 24, marginBottom: 12 },
-  sectionTitle: { marginBottom: 12, color: colors.navy, fontSize: 20, fontWeight: '800' },
-  optionList: { gap: 12 },
-  bookingOption: { minHeight: 76, borderRadius: 18, borderWidth: 1, borderColor: colors.border, padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, backgroundColor: colors.card },
-  bookingOptionActive: { borderColor: colors.green, backgroundColor: colors.greenSoft },
-  bookingOptionDisabled: { backgroundColor: '#f1f5f9', opacity: 0.62 },
-  optionTextBlock: { flex: 1 },
-  bookingOptionTitle: { color: colors.navy, fontSize: 18, fontWeight: '800' },
-  bookingOptionSubtitle: { marginTop: 4, color: colors.muted, fontSize: 14, fontWeight: '700' },
-  bookingOptionTitleActive: { color: colors.green },
-  bookingOptionSubtitleActive: { color: '#167a50' },
-  disabledText: { color: '#8a94a6' },
-  optionPill: { borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7, backgroundColor: '#eef3f8' },
-  optionPillActive: { backgroundColor: colors.green },
-  optionPillText: { color: colors.navySoft, fontSize: 12, fontWeight: '800' },
-  optionPillTextActive: { color: '#ffffff' },
-  emptySlots: { borderRadius: 16, padding: 16, backgroundColor: colors.redSoft },
-  emptySlotsText: { color: colors.red, fontSize: 14, fontWeight: '800' },
-  detailChipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  detailChip: { borderRadius: 999, paddingHorizontal: 13, paddingVertical: 9, backgroundColor: colors.greenSoft },
-  detailChipText: { color: colors.green, fontSize: 13, fontWeight: '800' },
-  disabledButton: { backgroundColor: '#9aa6b8', shadowOpacity: 0 },
-  successScreen: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  successMark: { width: 86, height: 86, borderRadius: 28, alignItems: 'center', justifyContent: 'center', marginBottom: 24, backgroundColor: colors.green },
-  successMarkText: { color: '#ffffff', fontSize: 42, fontWeight: '900' },
-  successTitle: { color: colors.navy, fontSize: 30, fontWeight: '800', lineHeight: 37, textAlign: 'center' },
-  successSubtitle: { marginTop: 12, marginBottom: 22, color: colors.muted, fontSize: 17, lineHeight: 24, textAlign: 'center' },
-  floatingCalendarButton: { position: 'absolute', right: 20, bottom: 22, height: 58, borderRadius: 19, flexDirection: 'row', alignItems: 'center', gap: 9, paddingHorizontal: 16, backgroundColor: colors.navy, shadowColor: colors.navy, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.22, shadowRadius: 18, elevation: 8 },
-  floatingCalendarIcon: { color: '#ffffff', fontSize: 22, fontWeight: '900' },
-  floatingCalendarText: { color: '#ffffff', fontSize: 14, fontWeight: '900' },
-  panelOverlay: { ...StyleSheet.absoluteFillObject, justifyContent: 'flex-end' },
-  panelBackdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(11, 31, 58, 0.22)' },
-  datePanel: { borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 22, paddingBottom: 26, backgroundColor: colors.card, shadowColor: '#1b2a41', shadowOffset: { width: 0, height: -8 }, shadowOpacity: 0.14, shadowRadius: 22, elevation: 12 },
-  panelHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 18 },
-  panelKicker: { color: colors.green, fontSize: 12, fontWeight: '900', textTransform: 'uppercase' },
-  panelTitle: { marginTop: 4, color: colors.navy, fontSize: 24, fontWeight: '900' },
-  closeButton: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: '#eef3f8' },
-  closeButtonText: { color: colors.navy, fontSize: 28, fontWeight: '700', lineHeight: 30 },
-  calendarGrid: { flexDirection: 'row', gap: 9 },
-  dayTile: { flex: 1, minHeight: 96, borderRadius: 18, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', paddingVertical: 12, paddingHorizontal: 6, backgroundColor: '#f8fafc' },
-  dayTileActive: { borderColor: colors.green, backgroundColor: colors.green },
-  dayLabel: { color: colors.navy, fontSize: 13, fontWeight: '900' },
-  dayLabelActive: { color: '#ffffff' },
-  dayDate: { marginTop: 5, color: colors.muted, fontSize: 12, fontWeight: '800' },
-  dayDateActive: { color: '#eafff3' },
-  dayMeta: { marginTop: 9, color: colors.green, fontSize: 11, fontWeight: '900' },
-  dayMetaActive: { color: '#ffffff' },
-  campusFooter: { marginTop: 18, borderRadius: 18, borderWidth: 1, borderColor: colors.border, padding: 16, backgroundColor: '#f8fafc' },
-  campusLabel: { color: colors.muted, fontSize: 12, fontWeight: '900', textTransform: 'uppercase' },
-  campusValue: { marginTop: 4, color: colors.navy, fontSize: 17, fontWeight: '900' },
+  legendText: { color: c.muted, fontSize: 13, fontWeight: '700' },
+  card: { borderRadius: 20, borderWidth: 1, borderColor: c.border, padding: 18, marginBottom: 14, backgroundColor: c.card, shadowColor: '#1b2a41', shadowOpacity: 0.08, shadowRadius: 18, elevation: 3 },
+  mutedCard: { backgroundColor: '#f8fafc', opacity: 0.78 },
+  fullCard: { backgroundColor: '#fff6f6', borderColor: '#f2c4c4' },
+  row: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 },
+  grow: { flex: 1 },
+  roomName: { color: c.text, fontSize: 24, fontWeight: '900' },
+  meta: { marginTop: 4, color: c.muted, fontSize: 14, fontWeight: '700', lineHeight: 20 },
+  cardMeta: { marginTop: 10, color: '#14345c', fontSize: 15, fontWeight: '800' },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 },
+  chip: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6, backgroundColor: '#eef3f8' },
+  chipText: { color: '#14345c', fontSize: 12, fontWeight: '800' },
+  badge: { borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7, backgroundColor: c.graySoft },
+  freeBadge: { backgroundColor: c.greenSoft },
+  grayBadge: { backgroundColor: c.graySoft },
+  redBadge: { backgroundColor: c.redSoft },
+  badgeText: { color: c.gray, fontSize: 12, fontWeight: '900' },
+  greenText: { color: c.green },
+  redText: { color: c.red },
+  profileBtn: { position: 'absolute', right: 20, top: 18, height: 48, borderRadius: 18, flexDirection: 'row', alignItems: 'center', gap: 9, paddingLeft: 7, paddingRight: 14, backgroundColor: c.card, borderWidth: 1, borderColor: c.border, elevation: 7 },
+  avatar: { width: 34, height: 34, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: c.navy },
+  avatarText: { color: '#fff', fontSize: 12, fontWeight: '900' },
+  profileBtnText: { color: c.navy, fontSize: 14, fontWeight: '900' },
+  dayButton: { position: 'absolute', right: 20, bottom: 22, height: 58, borderRadius: 19, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 18, backgroundColor: c.navy, elevation: 8 },
+  dayButtonText: { color: '#fff', fontSize: 14, fontWeight: '900' },
+  overlay: { ...StyleSheet.absoluteFillObject, justifyContent: 'flex-end' },
+  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(11, 31, 58, 0.22)' },
+  panel: { borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 22, paddingBottom: 26, backgroundColor: c.card },
+  panelTitle: { color: c.navy, fontSize: 24, fontWeight: '900' },
+  close: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: '#eef3f8' },
+  closeText: { color: c.navy, fontSize: 24, fontWeight: '900' },
+  dayGrid: { flexDirection: 'row', gap: 9, marginTop: 18 },
+  dayTile: { flex: 1, minHeight: 96, borderRadius: 18, borderWidth: 1, borderColor: c.border, alignItems: 'center', justifyContent: 'center', padding: 6, backgroundColor: '#f8fafc' },
+  dayTileActive: { borderColor: c.green, backgroundColor: c.green },
+  dayLabel: { color: c.navy, fontSize: 13, fontWeight: '900' },
+  dayDate: { marginTop: 5, color: c.muted, fontSize: 12, fontWeight: '800' },
+  dayCount: { marginTop: 9, color: c.green, fontSize: 12, fontWeight: '900' },
+  white: { color: '#fff' },
+  campus: { marginTop: 18, borderRadius: 18, borderWidth: 1, borderColor: c.border, padding: 16, backgroundColor: '#f8fafc' },
+  campusText: { color: c.navy, fontSize: 17, fontWeight: '900' },
+  back: { alignSelf: 'flex-start', borderRadius: 999, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 18, backgroundColor: '#e8eef6' },
+  backText: { color: c.navy, fontSize: 14, fontWeight: '900' },
+  hero: { borderRadius: 24, padding: 22, marginBottom: 20, backgroundColor: c.navy },
+  heroTitle: { marginTop: 18, color: '#fff', fontSize: 30, fontWeight: '900' },
+  heroSub: { marginTop: 8, color: '#c8d5e5', fontSize: 16, fontWeight: '700' },
+  sectionTitle: { marginTop: 18, marginBottom: 12, color: c.navy, fontSize: 20, fontWeight: '900' },
+  slot: { minHeight: 74, borderRadius: 18, borderWidth: 1, borderColor: c.border, padding: 16, marginBottom: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: c.card },
+  slotActive: { borderColor: c.green, backgroundColor: c.greenSoft },
+  disabled: { opacity: 0.55 },
+  slotTitle: { color: c.navy, fontSize: 18, fontWeight: '900' },
+  slotSub: { marginTop: 4, color: c.muted, fontSize: 14, fontWeight: '700' },
+  slotPill: { color: c.green, fontSize: 12, fontWeight: '900' },
+  empty: { borderRadius: 16, padding: 16, color: c.red, fontSize: 14, fontWeight: '900', backgroundColor: c.redSoft },
+  success: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+  check: { width: 86, height: 86, borderRadius: 28, textAlign: 'center', textAlignVertical: 'center', lineHeight: 86, marginBottom: 24, color: '#fff', fontSize: 24, fontWeight: '900', backgroundColor: c.green },
+  profileHero: { borderRadius: 24, padding: 24, alignItems: 'center', backgroundColor: c.navy, marginBottom: 18 },
+  bigAvatar: { width: 76, height: 76, borderRadius: 26, alignItems: 'center', justifyContent: 'center', backgroundColor: c.green },
+  bigAvatarText: { color: '#fff', fontSize: 24, fontWeight: '900' },
+  profileAction: { minHeight: 92, borderRadius: 20, borderWidth: 1, borderColor: c.border, flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, marginBottom: 14, backgroundColor: c.card },
+  actionIcon: { width: 42, height: 42, borderRadius: 14, overflow: 'hidden', textAlign: 'center', textAlignVertical: 'center', lineHeight: 42, color: c.green, fontSize: 13, fontWeight: '900', backgroundColor: c.greenSoft },
+  actionTitle: { color: c.navy, fontSize: 18, fontWeight: '900' },
+  arrow: { color: c.green, fontSize: 30, fontWeight: '900' },
+  dataRow: { borderRadius: 18, borderWidth: 1, borderColor: c.border, padding: 16, marginTop: 12, backgroundColor: c.card },
+  dataLabel: { color: c.muted, fontSize: 12, fontWeight: '900', textTransform: 'uppercase' },
+  dataValue: { marginTop: 7, color: c.navy, fontSize: 17, fontWeight: '800', lineHeight: 23 },
+  hint: { marginTop: 16, borderRadius: 18, padding: 16, backgroundColor: c.greenSoft },
+  bookingCard: { borderRadius: 20, borderWidth: 1, borderColor: c.border, padding: 17, marginTop: 12, backgroundColor: c.card },
+  bookingDate: { marginTop: 14, borderRadius: 14, padding: 12, backgroundColor: '#f8fafc' },
 });
