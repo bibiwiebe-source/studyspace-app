@@ -20,41 +20,41 @@ const slots = [
 ];
 
 const todayRooms: Room[] = [
-  { id: 'a101', name: 'A101', building: 'Gebaeude A', floor: 'Etage 1', capacity: 6, equipment: ['Beamer', 'Whiteboard', 'Steckdosen', 'WLAN', 'USB-C Dock'], bookings: [{ start: MORNING, end: AFTERNOON }] },
-  { id: 'b204', name: 'B204', building: 'Gebaeude B', floor: 'Etage 2', capacity: 4, equipment: ['Monitor', 'Steckdosen', 'WLAN', 'HDMI', 'Ergostuehle'], bookings: [] },
+  { id: 'a101', name: 'A101', building: 'Gebäude A', floor: 'Etage 1', capacity: 6, equipment: ['Beamer', 'Whiteboard', 'Steckdosen', 'WLAN', 'USB-C Dock'], bookings: [{ start: MORNING, end: AFTERNOON }] },
+  { id: 'b204', name: 'B204', building: 'Gebäude B', floor: 'Etage 2', capacity: 4, equipment: ['Monitor', 'Steckdosen', 'WLAN', 'HDMI', 'Ergostühle'], bookings: [] },
   { id: 'c015', name: 'C015', building: 'Bibliothek', floor: 'Erdgeschoss', capacity: 8, equipment: ['Smartboard', 'Whiteboard', 'Gruppentisch', 'WLAN', 'Akustikpaneele'], bookings: [{ start: AFTERNOON, end: END }] },
-  { id: 'd310', name: 'D310', building: 'Gebaeude D', floor: 'Etage 3', capacity: 10, equipment: ['Beamer', 'Lautsprecher', 'Whiteboard', 'WLAN', 'Kamera'], bookings: [{ start: MORNING, end: END }] },
+  { id: 'd310', name: 'D310', building: 'Gebäude D', floor: 'Etage 3', capacity: 10, equipment: ['Beamer', 'Lautsprecher', 'Whiteboard', 'WLAN', 'Kamera'], bookings: [{ start: MORNING, end: END }] },
   { id: 'bib22', name: 'Bib-22', building: 'Bibliothek', floor: 'Etage 2', capacity: 2, equipment: ['Ruhiger Bereich', 'Steckdosen', 'WLAN', 'Leselampe'], bookings: [] },
-  { id: 'f021', name: 'F021', building: 'Gebaeude F', floor: 'Erdgeschoss', capacity: 12, equipment: ['Smartboard', 'Beamer', 'WLAN', 'Konferenztisch'], bookings: [{ start: AFTERNOON, end: END }] },
-  { id: 'lab3', name: 'Lab-3', building: 'Medienlabor', floor: 'Etage 1', capacity: 6, equipment: ['Mac-Arbeitsplaetze', 'Grossbildschirm', 'WLAN', 'Audiointerface'], bookings: [{ start: MORNING, end: AFTERNOON }] },
-  { id: 'g404', name: 'G404', building: 'Gebaeude G', floor: 'Etage 4', capacity: 14, equipment: ['Smartboard', 'Whiteboard', 'WLAN', 'Hybrid-Meeting'], bookings: [{ start: MORNING, end: END }] },
-  { id: 'a220', name: 'A220', building: 'Gebaeude A', floor: 'Etage 2', capacity: 4, equipment: ['Monitor', 'WLAN', 'Steckdosen', 'Glasboard'], bookings: [] },
+  { id: 'f021', name: 'F021', building: 'Gebäude F', floor: 'Erdgeschoss', capacity: 12, equipment: ['Smartboard', 'Beamer', 'WLAN', 'Konferenztisch'], bookings: [{ start: AFTERNOON, end: END }] },
+  { id: 'lab3', name: 'Lab-3', building: 'Medienlabor', floor: 'Etage 1', capacity: 6, equipment: ['Mac-Arbeitsplätze', 'Großbildschirm', 'WLAN', 'Audiointerface'], bookings: [{ start: MORNING, end: AFTERNOON }] },
+  { id: 'g404', name: 'G404', building: 'Gebäude G', floor: 'Etage 4', capacity: 14, equipment: ['Smartboard', 'Whiteboard', 'WLAN', 'Hybrid-Meeting'], bookings: [{ start: MORNING, end: END }] },
+  { id: 'a220', name: 'A220', building: 'Gebäude A', floor: 'Etage 2', capacity: 4, equipment: ['Monitor', 'WLAN', 'Steckdosen', 'Glasboard'], bookings: [] },
 ];
 
 const futureSets: Room[][] = [
   [
     { id: 'mx101', name: 'MX101', building: 'MakerSpace', floor: 'Etage 1', capacity: 6, equipment: ['3D-Drucker nah', 'Whiteboard', 'WLAN'], bookings: [{ start: AFTERNOON, end: END }] },
-    { id: 'h205', name: 'H205', building: 'Gebaeude H', floor: 'Etage 2', capacity: 8, equipment: ['Smartboard', 'USB-C Dock', 'WLAN'], bookings: [] },
-    { id: 'j030', name: 'J030', building: 'Gebaeude J', floor: 'Erdgeschoss', capacity: 10, equipment: ['Beamer', 'Whiteboard', 'WLAN'], bookings: [{ start: MORNING, end: END }] },
+    { id: 'h205', name: 'H205', building: 'Gebäude H', floor: 'Etage 2', capacity: 8, equipment: ['Smartboard', 'USB-C Dock', 'WLAN'], bookings: [] },
+    { id: 'j030', name: 'J030', building: 'Gebäude J', floor: 'Erdgeschoss', capacity: 10, equipment: ['Beamer', 'Whiteboard', 'WLAN'], bookings: [{ start: MORNING, end: END }] },
   ],
   [
-    { id: 'a303', name: 'A303', building: 'Gebaeude A', floor: 'Etage 3', capacity: 5, equipment: ['Monitor', 'WLAN', 'Tageslicht'], bookings: [] },
-    { id: 'c102', name: 'C102', building: 'Gebaeude C', floor: 'Etage 1', capacity: 7, equipment: ['Smartboard', 'Whiteboard', 'WLAN'], bookings: [{ start: AFTERNOON, end: END }] },
+    { id: 'a303', name: 'A303', building: 'Gebäude A', floor: 'Etage 3', capacity: 5, equipment: ['Monitor', 'WLAN', 'Tageslicht'], bookings: [] },
+    { id: 'c102', name: 'C102', building: 'Gebäude C', floor: 'Etage 1', capacity: 7, equipment: ['Smartboard', 'Whiteboard', 'WLAN'], bookings: [{ start: AFTERNOON, end: END }] },
     { id: 'bib31', name: 'Bib-31', building: 'Bibliothek', floor: 'Etage 3', capacity: 2, equipment: ['Silent Zone', 'Steckdosen', 'WLAN'], bookings: [] },
   ],
   [
-    { id: 'd022', name: 'D022', building: 'Gebaeude D', floor: 'Erdgeschoss', capacity: 6, equipment: ['Whiteboard', 'Pinnwand', 'WLAN'], bookings: [{ start: MORNING, end: AFTERNOON }] },
-    { id: 'g210', name: 'G210', building: 'Gebaeude G', floor: 'Etage 2', capacity: 9, equipment: ['Smartboard', 'Lautsprecher', 'WLAN'], bookings: [] },
-    { id: 'media2', name: 'Media-2', building: 'Medienlabor', floor: 'Etage 1', capacity: 4, equipment: ['Mac-Arbeitsplaetze', 'Audiointerface', 'WLAN'], bookings: [{ start: AFTERNOON, end: END }] },
+    { id: 'd022', name: 'D022', building: 'Gebäude D', floor: 'Erdgeschoss', capacity: 6, equipment: ['Whiteboard', 'Pinnwand', 'WLAN'], bookings: [{ start: MORNING, end: AFTERNOON }] },
+    { id: 'g210', name: 'G210', building: 'Gebäude G', floor: 'Etage 2', capacity: 9, equipment: ['Smartboard', 'Lautsprecher', 'WLAN'], bookings: [] },
+    { id: 'media2', name: 'Media-2', building: 'Medienlabor', floor: 'Etage 1', capacity: 4, equipment: ['Mac-Arbeitsplätze', 'Audiointerface', 'WLAN'], bookings: [{ start: AFTERNOON, end: END }] },
   ],
   [
-    { id: 'k115', name: 'K115', building: 'Gebaeude K', floor: 'Etage 1', capacity: 8, equipment: ['Beamer', 'Whiteboard', 'WLAN'], bookings: [] },
-    { id: 'l404', name: 'L404', building: 'Gebaeude L', floor: 'Etage 4', capacity: 14, equipment: ['Smartboard', 'Hybrid-Meeting', 'WLAN'], bookings: [{ start: MORNING, end: END }] },
-    { id: 'e009', name: 'E009', building: 'Gebaeude E', floor: 'Erdgeschoss', capacity: 5, equipment: ['Monitor', 'USB-C Dock', 'WLAN'], bookings: [] },
+    { id: 'k115', name: 'K115', building: 'Gebäude K', floor: 'Etage 1', capacity: 8, equipment: ['Beamer', 'Whiteboard', 'WLAN'], bookings: [] },
+    { id: 'l404', name: 'L404', building: 'Gebäude L', floor: 'Etage 4', capacity: 14, equipment: ['Smartboard', 'Hybrid-Meeting', 'WLAN'], bookings: [{ start: MORNING, end: END }] },
+    { id: 'e009', name: 'E009', building: 'Gebäude E', floor: 'Erdgeschoss', capacity: 5, equipment: ['Monitor', 'USB-C Dock', 'WLAN'], bookings: [] },
   ],
   [
-    { id: 'b018', name: 'B018', building: 'Gebaeude B', floor: 'Erdgeschoss', capacity: 6, equipment: ['Whiteboard', 'Steckdosen', 'WLAN'], bookings: [{ start: AFTERNOON, end: END }] },
-    { id: 'c220', name: 'C220', building: 'Gebaeude C', floor: 'Etage 2', capacity: 10, equipment: ['Smartboard', 'Gruppentisch', 'WLAN'], bookings: [] },
+    { id: 'b018', name: 'B018', building: 'Gebäude B', floor: 'Erdgeschoss', capacity: 6, equipment: ['Whiteboard', 'Steckdosen', 'WLAN'], bookings: [{ start: AFTERNOON, end: END }] },
+    { id: 'c220', name: 'C220', building: 'Gebäude C', floor: 'Etage 2', capacity: 10, equipment: ['Smartboard', 'Gruppentisch', 'WLAN'], bookings: [] },
     { id: 'bib40', name: 'Bib-40', building: 'Bibliothek', floor: 'Etage 4', capacity: 4, equipment: ['Leselampen', 'Steckdosen', 'WLAN'], bookings: [] },
   ],
 ];
@@ -64,15 +64,15 @@ const profileRows = [
   ['Nachname', 'Schneider'],
   ['Matrikelnummer', '1124587'],
   ['Eingeschrieben in', 'BBW'],
-  ['Campus / Fachbereich', 'HSNR Campus MG - Fachbereich 08'],
+  ['Campus / Fachbereich', 'HSNR Campus MG · Fachbereich 08'],
   ['Zugang', 'Bis Ende des Semesters aktiv'],
 ];
 
 const profileBookings = [
-  { room: 'B204', day: 'Heute', building: 'Gebaeude B', slot: 'Nachmittag - 13:00 bis 18:00 Uhr' },
-  { room: 'Bib-22', day: 'Mo, 22.06.', building: 'Bibliothek', slot: 'Vormittag - 08:00 bis 13:00 Uhr' },
-  { room: 'H205', day: 'Di, 23.06.', building: 'Gebaeude H', slot: 'Ganzer Tag - 08:00 bis 18:00 Uhr' },
-  { room: 'Media-2', day: 'Do, 25.06.', building: 'Medienlabor', slot: 'Nachmittag - 13:00 bis 18:00 Uhr' },
+  { room: 'B204', day: 'Heute', building: 'Gebäude B', slot: 'Nachmittag · 13:00 bis 18:00 Uhr' },
+  { room: 'Bib-22', day: 'Mo, 22.06.', building: 'Bibliothek', slot: 'Vormittag · 08:00 bis 13:00 Uhr' },
+  { room: 'H205', day: 'Di, 23.06.', building: 'Gebäude H', slot: 'Ganzer Tag · 08:00 bis 18:00 Uhr' },
+  { room: 'Media-2', day: 'Do, 25.06.', building: 'Medienlabor', slot: 'Nachmittag · 13:00 bis 18:00 Uhr' },
 ];
 
 const time = (minutes: number) => `${Math.floor(minutes / 60).toString().padStart(2, '0')}:${(minutes % 60).toString().padStart(2, '0')}`;
@@ -183,7 +183,7 @@ export default function App() {
     if (!selectedRoom || !selectedSlot) return;
     const slot = slots.find((item) => item.id === selectedSlot);
     if (!slot || overlaps(selectedRoom.bookings, slot.start, slot.end)) {
-      Alert.alert('Nicht verfuegbar', 'Dieser Zeitraum ist bereits belegt.');
+      Alert.alert('Nicht verfügbar', 'Dieser Zeitraum ist bereits belegt.');
       return;
     }
     const booking = { start: slot.start, end: slot.end };
@@ -201,7 +201,7 @@ export default function App() {
         <View style={styles.login}>
           <StudyIcon small />
           <Text style={styles.appTitle}>StudySpace</Text>
-          <Text style={styles.sub}>Finde und buche freie Lernraeume auf dem Campus</Text>
+          <Text style={styles.sub}>Finde und buche freie Lernräume auf dem Campus</Text>
           <TextInput style={styles.input} placeholder="Matrikelnummer oder E-Mail" placeholderTextColor="#8a94a6" value={login} onChangeText={setLogin} />
           <TextInput style={styles.input} placeholder="Passwort" placeholderTextColor="#8a94a6" secureTextEntry value={password} onChangeText={setPassword} />
           <TouchableOpacity style={styles.primary} onPress={() => setScreen('loading')}><Text style={styles.primaryText}>Einloggen</Text></TouchableOpacity>
@@ -212,8 +212,8 @@ export default function App() {
         <>
           <ScrollView style={styles.screen} contentContainerStyle={styles.scroll}>
             <Text style={styles.kicker}>{selectedDay.isToday ? `Campus heute - Jetzt ${time(NOW)} Uhr` : `Campus ${selectedDay.short}. ${selectedDay.date}`}</Text>
-            <Text style={styles.title}>Freie Lernraeume</Text>
-            <Text style={styles.sub}>{freeCount} Raeume sind {selectedDay.isToday ? 'aktuell direkt frei' : 'fuer diesen Tag komplett frei'}</Text>
+            <Text style={styles.title}>Freie Lernräume</Text>
+            <Text style={styles.sub}>{freeCount} Räume sind {selectedDay.isToday ? 'aktuell direkt frei' : 'für diesen Tag komplett frei'}</Text>
             <View style={styles.legend}><Legend color={c.green} text="frei" /><Legend color={c.gray} text={selectedDay.isToday ? 'gerade belegt' : 'teilweise reserviert'} /><Legend color={c.red} text="ausgebucht" /></View>
             {rooms.map((room) => {
               const status = statusFor(room, selectedDay.isToday);
@@ -222,18 +222,18 @@ export default function App() {
             })}
           </ScrollView>
           <TouchableOpacity style={styles.profileBtn} onPress={() => setScreen('profile')}>
-            <View style={styles.avatar}><Text style={styles.avatarText}>MS</Text></View><Text style={styles.profileBtnText}>Profile</Text>
+            <View style={styles.avatar}><Text style={styles.avatarText}>MS</Text></View><Text style={styles.profileBtnText}>Profil</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.dayButton} onPress={() => setShowDays(true)}><Text style={styles.dayButtonText}>Tage</Text></TouchableOpacity>
+          {!showDays && <TouchableOpacity style={styles.dayButton} onPress={() => setShowDays(true)}><Text style={styles.dayButtonIcon}>▦</Text><Text style={styles.dayButtonText}>Tage</Text></TouchableOpacity>}
           {showDays && <DayPanel days={days} selectedKey={selectedDayKey} onClose={() => setShowDays(false)} onPick={selectDay} />}
         </>
       )}
       {screen === 'detail' && selectedRoom && (
         <ScrollView style={styles.screen} contentContainerStyle={styles.scroll}>
           <Back onPress={goRooms} />
-          <View style={styles.hero}><Badge status={statusFor(selectedRoom, selectedDay.isToday)} label={selectedRoom.name} /><Text style={styles.heroTitle}>{selectedRoom.building}</Text><Text style={styles.heroSub}>{selectedRoom.floor} - {selectedRoom.capacity} Plaetze</Text></View>
-          <Text style={styles.sectionTitle}>Zeitraum waehlen</Text>
-          {availableSlots.length === 0 ? <Text style={styles.empty}>Dieser Raum ist an diesem Tag vollstaendig ausgebucht.</Text> : slots.map((slot) => {
+          <View style={styles.hero}><Badge status={statusFor(selectedRoom, selectedDay.isToday)} label={selectedRoom.name} /><Text style={styles.heroTitle}>{selectedRoom.building}</Text><Text style={styles.heroSub}>{selectedRoom.floor} · {selectedRoom.capacity} Plätze</Text></View>
+          <Text style={styles.sectionTitle}>Zeitraum wählen</Text>
+          {availableSlots.length === 0 ? <Text style={styles.empty}>Dieser Raum ist an diesem Tag vollständig ausgebucht.</Text> : slots.map((slot) => {
             const free = !overlaps(selectedRoom.bookings, slot.start, slot.end);
             const active = selectedSlot === slot.id;
             return <TouchableOpacity key={slot.id} disabled={!free} style={[styles.slot, active && styles.slotActive, !free && styles.disabled]} onPress={() => setSelectedSlot(slot.id)}><View><Text style={styles.slotTitle}>{slot.title}</Text><Text style={styles.slotSub}>{slot.subtitle}</Text></View><Text style={styles.slotPill}>{free ? 'frei' : 'belegt'}</Text></TouchableOpacity>;
@@ -244,7 +244,7 @@ export default function App() {
         </ScrollView>
       )}
       {screen === 'success' && bookedRoom && bookedSlot && (
-        <View style={styles.success}><Text style={styles.check}>OK</Text><Text style={styles.title}>Deine Buchung wurde bestaetigt</Text><Text style={styles.sub}>{bookedRoom.name} ist von {time(bookedSlot.start)} bis {time(bookedSlot.end)} Uhr reserviert.</Text><TouchableOpacity style={styles.primary} onPress={goRooms}><Text style={styles.primaryText}>Zurueck zur Uebersicht</Text></TouchableOpacity></View>
+        <View style={styles.success}><Text style={styles.check}>OK</Text><Text style={styles.title}>Deine Buchung wurde bestätigt</Text><Text style={styles.sub}>{bookedRoom.name} ist von {time(bookedSlot.start)} bis {time(bookedSlot.end)} Uhr reserviert.</Text><TouchableOpacity style={styles.primary} onPress={goRooms}><Text style={styles.primaryText}>Zurück zur Übersicht</Text></TouchableOpacity></View>
       )}
       {screen === 'profile' && <ProfileMenu onBack={goRooms} onData={() => setScreen('profileData')} onBookings={() => setScreen('bookings')} />}
       {screen === 'profileData' && <ProfileData onBack={() => setScreen('profile')} />}
@@ -262,21 +262,22 @@ function StudyIcon({ small }: { small?: boolean }) {
 }
 
 function Loading({ dots, progress }: { dots: Animated.Value[]; progress: Animated.Value }) {
-  return <View style={styles.loading}><Text style={styles.kicker}>Campusdaten werden vorbereitet</Text><Text style={styles.title}>StudySpaces laden</Text><Text style={styles.sub}>Raeume, Zeitfenster und Verfuegbarkeit werden lokal geladen.</Text><View style={styles.loadingIcons}>{['Buch', 'Stift', 'Raum'].map((label, index) => <Animated.View key={label} style={[styles.loadingCard, { transform: [{ translateY: dots[index].interpolate({ inputRange: [0, 1], outputRange: [0, -12] }) }] }]}><Text style={styles.loadingIcon}>{label}</Text></Animated.View>)}</View><View style={styles.dotRow}>{dots.map((dot, index) => <Animated.View key={index} style={[styles.dot, { opacity: dot.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) }]} />)}</View><View style={styles.track}><Animated.View style={[styles.fill, { width: progress.interpolate({ inputRange: [0, 1], outputRange: ['8%', '100%'] }) }]} /></View></View>;
+  const items = [{ label: 'Buch', icon: '▭' }, { label: 'Stift', icon: '✎' }, { label: 'Raum', icon: '⌂' }];
+  return <View style={styles.loading}><Text style={styles.kicker}>Campusdaten werden vorbereitet</Text><Text style={styles.title}>StudySpaces laden</Text><Text style={styles.sub}>Räume, Zeitfenster und Verfügbarkeit werden lokal geladen.</Text><View style={styles.loadingIcons}>{items.map((item, index) => <Animated.View key={item.label} style={[styles.loadingCard, { transform: [{ translateY: dots[index].interpolate({ inputRange: [0, 1], outputRange: [0, -12] }) }] }]}><Text style={styles.loadingSymbol}>{item.icon}</Text><Text style={styles.loadingIcon}>{item.label}</Text></Animated.View>)}</View><View style={styles.dotRow}>{dots.map((dot, index) => <Animated.View key={index} style={[styles.dot, { opacity: dot.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) }]} />)}</View><View style={styles.track}><Animated.View style={[styles.fill, { width: progress.interpolate({ inputRange: [0, 1], outputRange: ['8%', '100%'] }) }]} /></View></View>;
 }
 
 function RoomCard({ room, status, label, isToday, onPress }: { room: Room; status: string; label: string; isToday: boolean; onPress: () => void }) {
   const available = optionsFor(room);
   const text = available.length === 0 ? (isToday ? 'Heute ausgebucht' : 'An diesem Tag ausgebucht') : available.length === 3 ? 'Vormittag, Nachmittag oder ganztags buchbar' : `Noch buchbar: ${available.map((slot) => slot.title).join(', ')}`;
-  return <TouchableOpacity style={[styles.card, status !== 'free' && styles.mutedCard, status === 'full' && styles.fullCard]} onPress={onPress}><View style={styles.row}><View style={styles.grow}><Text style={styles.roomName}>{room.name}</Text><Text style={styles.meta}>{room.building} - {room.floor}</Text></View><Badge status={status} label={label} /></View><Text style={styles.cardMeta}>{room.capacity} Plaetze - halb- oder ganztags</Text><Text style={styles.meta}>{text}</Text><View style={styles.chips}>{room.equipment.slice(0, 3).map((item) => <Chip key={item} text={item} />)}</View></TouchableOpacity>;
+  return <TouchableOpacity style={[styles.card, status !== 'free' && styles.mutedCard, status === 'full' && styles.fullCard]} onPress={onPress}><View style={styles.row}><View style={styles.grow}><Text style={styles.roomName}>{room.name}</Text><Text style={styles.meta}>{room.building} · {room.floor}</Text></View><Badge status={status} label={label} /></View><Text style={styles.cardMeta}>{room.capacity} Plätze · halb- oder ganztags</Text><Text style={styles.meta}>{text}</Text><View style={styles.chips}>{room.equipment.slice(0, 3).map((item) => <Chip key={item} text={item} />)}</View></TouchableOpacity>;
 }
 
 function DayPanel({ days, selectedKey, onPick, onClose }: { days: Workday[]; selectedKey: string; onPick: (day: Workday) => void; onClose: () => void }) {
-  return <View style={styles.overlay}><TouchableOpacity style={styles.backdrop} onPress={onClose} /><View style={styles.panel}><View style={styles.row}><View><Text style={styles.kicker}>Arbeitswoche</Text><Text style={styles.panelTitle}>Freie Tage waehlen</Text></View><TouchableOpacity style={styles.close} onPress={onClose}><Text style={styles.closeText}>x</Text></TouchableOpacity></View><View style={styles.dayGrid}>{days.map((day) => { const active = selectedKey === day.key; const count = roomsFor(day).filter((room) => statusFor(room, day.isToday) === 'free').length; return <TouchableOpacity key={day.key} style={[styles.dayTile, active && styles.dayTileActive]} onPress={() => onPick(day)}><Text style={[styles.dayLabel, active && styles.white]}>{day.label}</Text><Text style={[styles.dayDate, active && styles.white]}>{day.date}</Text><Text style={[styles.dayCount, active && styles.white]}>{count} frei</Text></TouchableOpacity>; })}</View><View style={styles.campus}><Text style={styles.meta}>Aktueller Campus</Text><Text style={styles.campusText}>HSNR Campus MG</Text></View></View></View>;
+  return <View style={styles.overlay}><TouchableOpacity style={styles.backdrop} onPress={onClose} /><View style={styles.panel}><View style={styles.row}><View><Text style={styles.kicker}>Arbeitswoche</Text><Text style={styles.panelTitle}>Freie Tage wählen</Text></View><TouchableOpacity style={styles.close} onPress={onClose}><Text style={styles.closeText}>×</Text></TouchableOpacity></View><View style={styles.dayGrid}>{days.map((day) => { const active = selectedKey === day.key; const count = roomsFor(day).filter((room) => statusFor(room, day.isToday) === 'free').length; return <TouchableOpacity key={day.key} style={[styles.dayTile, active && styles.dayTileActive]} onPress={() => onPick(day)}><Text style={[styles.dayLabel, active && styles.white]}>{day.label}</Text><Text style={[styles.dayDate, active && styles.white]}>{day.date}</Text><Text style={[styles.dayCount, active && styles.white]}>{count} frei</Text></TouchableOpacity>; })}</View><View style={styles.campus}><Text style={styles.meta}>Aktueller Campus</Text><Text style={styles.campusText}>HSNR Campus MG</Text></View></View></View>;
 }
 
 function ProfileMenu({ onBack, onData, onBookings }: { onBack: () => void; onData: () => void; onBookings: () => void }) {
-  return <ScrollView style={styles.screen} contentContainerStyle={styles.scroll}><Back onPress={onBack} /><View style={styles.profileHero}><View style={styles.bigAvatar}><Text style={styles.bigAvatarText}>MS</Text></View><Text style={styles.heroTitle}>Mira Schneider</Text><Text style={styles.heroSub}>Studentin - BBW - HSNR Campus MG</Text></View><ProfileAction title="Profildaten" sub="Matrikelnummer, Campus und Zugang anzeigen" onPress={onData} /><ProfileAction title="Meine Buchungen" sub="Gebuchte Raeume und Tage ansehen" onPress={onBookings} /></ScrollView>;
+  return <ScrollView style={styles.screen} contentContainerStyle={styles.scroll}><Back onPress={onBack} /><View style={styles.profileHero}><View style={styles.bigAvatar}><Text style={styles.bigAvatarText}>MS</Text></View><Text style={styles.heroTitle}>Mira Schneider</Text><Text style={styles.heroSub}>Studentin · BBW · HSNR Campus MG</Text></View><ProfileAction title="Profildaten" sub="Matrikelnummer, Campus und Zugang anzeigen" onPress={onData} /><ProfileAction title="Meine Buchungen" sub="Gebuchte Räume und Tage ansehen" onPress={onBookings} /></ScrollView>;
 }
 
 function ProfileAction({ title, sub, onPress }: { title: string; sub: string; onPress: () => void }) {
@@ -284,15 +285,15 @@ function ProfileAction({ title, sub, onPress }: { title: string; sub: string; on
 }
 
 function ProfileData({ onBack }: { onBack: () => void }) {
-  return <ScrollView style={styles.screen} contentContainerStyle={styles.scroll}><Back onPress={onBack} /><Text style={styles.title}>Profildaten</Text><Text style={styles.sub}>Deine hinterlegten Testdaten fuer den StudySpace-PoC.</Text>{profileRows.map(([label, value]) => <View style={styles.dataRow} key={label}><Text style={styles.dataLabel}>{label}</Text><Text style={styles.dataValue}>{value}</Text></View>)}<View style={styles.hint}><Text style={styles.actionTitle}>Hinweis zum Zugang</Text><Text style={styles.meta}>Der Zugang wird erweitert bei Verlaengerung der Kooperation mit der Hochschule.</Text></View></ScrollView>;
+  return <ScrollView style={styles.screen} contentContainerStyle={styles.scroll}><Back onPress={onBack} /><Text style={styles.title}>Profildaten</Text><Text style={styles.sub}>Hier sind deine Profildaten. Wir bei StudySpace passen gut darauf auf.</Text>{profileRows.map(([label, value]) => <View style={styles.dataRow} key={label}><Text style={styles.dataLabel}>{label}</Text><Text style={styles.dataValue}>{value}</Text></View>)}<View style={styles.hint}><Text style={styles.actionTitle}>Hinweis zum Zugang</Text><Text style={styles.meta}>Der Zugang wird erweitert bei Verlängerung der Kooperation mit der Hochschule.</Text></View></ScrollView>;
 }
 
 function Bookings({ onBack }: { onBack: () => void }) {
-  return <ScrollView style={styles.screen} contentContainerStyle={styles.scroll}><Back onPress={onBack} /><Text style={styles.title}>Meine Buchungen</Text><Text style={styles.sub}>Eine lokale Testliste deiner gebuchten Lernraeume.</Text>{profileBookings.map((booking) => <View style={styles.bookingCard} key={`${booking.room}-${booking.day}`}><Text style={styles.roomName}>{booking.room}</Text><Text style={styles.meta}>{booking.building}</Text><View style={styles.bookingDate}><Text style={styles.dayCount}>{booking.day}</Text><Text style={styles.cardMeta}>{booking.slot}</Text></View></View>)}</ScrollView>;
+  return <ScrollView style={styles.screen} contentContainerStyle={styles.scroll}><Back onPress={onBack} /><Text style={styles.title}>Meine Buchungen</Text><Text style={styles.sub}>Hier sind deine Buchungen. Achtet bei der Nutzung auf eine verantwortungsvolle Nutzung, damit die Studis von morgen auch etwas davon haben.</Text>{profileBookings.map((booking) => <View style={styles.bookingCard} key={`${booking.room}-${booking.day}`}><Text style={styles.roomName}>{booking.room}</Text><Text style={styles.meta}>{booking.building}</Text><View style={styles.bookingDate}><Text style={styles.dayCount}>{booking.day}</Text><Text style={styles.cardMeta}>{booking.slot}</Text></View></View>)}</ScrollView>;
 }
 
 function Back({ onPress }: { onPress: () => void }) {
-  return <TouchableOpacity style={styles.back} onPress={onPress}><Text style={styles.backText}>Zurueck</Text></TouchableOpacity>;
+  return <TouchableOpacity style={styles.back} onPress={onPress}><Text style={styles.backText}>Zurück</Text></TouchableOpacity>;
 }
 
 function Badge({ status, label }: { status: string; label: string }) {
@@ -315,10 +316,10 @@ const styles = StyleSheet.create({
   scroll: { padding: 22, paddingBottom: 112 },
   home: { flex: 1, padding: 24 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  login: { flex: 1, justifyContent: 'center', padding: 24 },
+  login: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
   footer: { alignSelf: 'flex-end', color: c.muted, fontSize: 12, fontWeight: '700', textAlign: 'right' },
   icon: { width: 112, height: 112, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 24, backgroundColor: c.navy, shadowColor: c.navy, shadowOpacity: 0.2, shadowRadius: 18, elevation: 6 },
-  iconSmall: { transform: [{ scale: 0.78 }], marginBottom: 10 },
+  iconSmall: { transform: [{ scale: 0.78 }], marginBottom: 10, alignSelf: 'center' },
   iconBuilding: { width: 52, height: 58, borderTopLeftRadius: 12, borderTopRightRadius: 12, alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, backgroundColor: '#fff' },
   windowRow: { flexDirection: 'row', gap: 7 },
   window: { width: 10, height: 10, borderRadius: 3, backgroundColor: c.green },
@@ -331,12 +332,13 @@ const styles = StyleSheet.create({
   title: { color: c.navy, fontSize: 34, fontWeight: '900' },
   sub: { marginTop: 8, marginBottom: 16, color: c.muted, fontSize: 16, lineHeight: 23, textAlign: 'center' },
   kicker: { marginBottom: 6, color: c.green, fontSize: 13, fontWeight: '900', textTransform: 'uppercase' },
-  input: { height: 56, borderRadius: 16, borderWidth: 1, borderColor: c.border, paddingHorizontal: 18, marginBottom: 14, backgroundColor: c.card, color: c.text, fontSize: 16 },
-  primary: { minHeight: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginTop: 8, paddingHorizontal: 18, backgroundColor: c.navy, shadowColor: c.navy, shadowOpacity: 0.16, shadowRadius: 14, elevation: 4 },
+  input: { width: '100%', height: 56, borderRadius: 16, borderWidth: 1, borderColor: c.border, paddingHorizontal: 18, marginBottom: 14, backgroundColor: c.card, color: c.text, fontSize: 16 },
+  primary: { width: '100%', minHeight: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginTop: 8, paddingHorizontal: 18, backgroundColor: c.navy, shadowColor: c.navy, shadowOpacity: 0.16, shadowRadius: 14, elevation: 4 },
   primaryText: { color: '#fff', fontSize: 16, fontWeight: '900' },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
   loadingIcons: { flexDirection: 'row', gap: 12, marginTop: 36, marginBottom: 26 },
   loadingCard: { width: 88, height: 98, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: c.card, borderWidth: 1, borderColor: c.border },
+  loadingSymbol: { color: c.navy, fontSize: 27, fontWeight: '900', marginBottom: 8 },
   loadingIcon: { color: c.green, fontSize: 14, fontWeight: '900' },
   dotRow: { flexDirection: 'row', gap: 10, height: 20 },
   dot: { width: 11, height: 11, borderRadius: 99, backgroundColor: c.green },
@@ -368,7 +370,8 @@ const styles = StyleSheet.create({
   avatar: { width: 34, height: 34, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: c.navy },
   avatarText: { color: '#fff', fontSize: 12, fontWeight: '900' },
   profileBtnText: { color: c.navy, fontSize: 14, fontWeight: '900' },
-  dayButton: { position: 'absolute', right: 20, bottom: 22, height: 58, borderRadius: 19, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 18, backgroundColor: c.navy, elevation: 8 },
+  dayButton: { position: 'absolute', right: 20, bottom: 22, height: 58, borderRadius: 19, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 18, backgroundColor: c.navy, elevation: 8 },
+  dayButtonIcon: { color: '#fff', fontSize: 22, fontWeight: '900' },
   dayButtonText: { color: '#fff', fontSize: 14, fontWeight: '900' },
   overlay: { ...StyleSheet.absoluteFillObject, justifyContent: 'flex-end' },
   backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(11, 31, 58, 0.22)' },
