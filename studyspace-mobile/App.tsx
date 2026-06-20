@@ -276,9 +276,9 @@ function Loading({ dots, progress }: { dots: Animated.Value[]; progress: Animate
 }
 
 function LoadingMiniIcon({ type }: { type: string }) {
-  if (type === 'room') return <View style={styles.roomMini}><View style={styles.roomMiniWall}><View style={styles.roomMiniWindow} /><View style={styles.roomMiniWindow} /></View><View style={styles.roomMiniDoor} /></View>;
-  if (type === 'equipment') return <View style={styles.equipmentMini}><View style={styles.equipmentScreen}><View style={styles.equipmentSpark} /></View><View style={styles.equipmentCable} /><View style={styles.equipmentPlug} /></View>;
-  return <View style={styles.studyMini}><View style={styles.studyMiniBook}><View style={styles.studyMiniPage} /></View><View style={styles.studyMiniLamp}><View style={styles.studyMiniLight} /></View></View>;
+  if (type === 'room') return <View style={styles.doorMini}><View style={styles.doorMiniKnob} /></View>;
+  if (type === 'equipment') return <View style={styles.monitorMini}><View style={styles.monitorMiniStand} /></View>;
+  return <View style={styles.bookMini}><View style={styles.bookMiniSpine} /></View>;
 }
 
 function RoomCard({ room, status, label, isToday, onPress }: { room: Room; status: string; label: string; isToday: boolean; onPress: () => void }) {
@@ -355,20 +355,12 @@ const styles = StyleSheet.create({
   loadingCard: { width: 88, height: 98, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: c.card, borderWidth: 1, borderColor: c.border },
   loadingSymbol: { color: c.navy, fontSize: 27, fontWeight: '900', marginBottom: 8 },
   loadingIcon: { color: c.green, fontSize: 14, fontWeight: '900' },
-  roomMini: { width: 42, height: 36, alignItems: 'center', justifyContent: 'flex-end', marginBottom: 10 },
-  roomMiniWall: { width: 38, height: 29, borderRadius: 8, borderWidth: 2, borderColor: c.green, backgroundColor: c.greenSoft, flexDirection: 'row', justifyContent: 'center', gap: 5, paddingTop: 7 },
-  roomMiniWindow: { width: 7, height: 7, borderRadius: 2, backgroundColor: c.green },
-  roomMiniDoor: { position: 'absolute', bottom: 0, width: 12, height: 16, borderTopLeftRadius: 5, borderTopRightRadius: 5, backgroundColor: c.navy },
-  equipmentMini: { width: 42, height: 36, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
-  equipmentScreen: { width: 35, height: 22, borderRadius: 7, borderWidth: 2, borderColor: c.green, backgroundColor: '#fff', alignItems: 'flex-end', padding: 4 },
-  equipmentSpark: { width: 7, height: 7, borderRadius: 99, backgroundColor: c.green },
-  equipmentCable: { width: 3, height: 10, backgroundColor: c.navy },
-  equipmentPlug: { width: 19, height: 6, borderRadius: 99, backgroundColor: c.navy },
-  studyMini: { width: 42, height: 36, alignItems: 'center', justifyContent: 'flex-end', marginBottom: 10 },
-  studyMiniBook: { width: 31, height: 20, borderRadius: 7, backgroundColor: c.greenSoft, borderWidth: 2, borderColor: c.green, alignItems: 'center', justifyContent: 'center' },
-  studyMiniPage: { width: 2, height: 15, borderRadius: 99, backgroundColor: c.green },
-  studyMiniLamp: { position: 'absolute', right: 0, top: 0, width: 17, height: 22, borderTopLeftRadius: 9, borderTopRightRadius: 9, backgroundColor: c.navy, alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 3 },
-  studyMiniLight: { width: 9, height: 4, borderRadius: 99, backgroundColor: c.green },
+  doorMini: { width: 28, height: 34, borderRadius: 8, borderWidth: 2, borderColor: c.green, backgroundColor: c.greenSoft, marginBottom: 10, alignItems: 'flex-end', justifyContent: 'center', paddingRight: 5 },
+  doorMiniKnob: { width: 5, height: 5, borderRadius: 99, backgroundColor: c.navy },
+  monitorMini: { width: 36, height: 27, borderRadius: 7, borderWidth: 2, borderColor: c.green, backgroundColor: '#fff', marginBottom: 10, alignItems: 'center', justifyContent: 'flex-end' },
+  monitorMiniStand: { width: 18, height: 5, borderRadius: 99, marginBottom: -8, backgroundColor: c.navy },
+  bookMini: { width: 34, height: 28, borderRadius: 7, borderWidth: 2, borderColor: c.green, backgroundColor: c.greenSoft, marginBottom: 10, alignItems: 'center', justifyContent: 'center' },
+  bookMiniSpine: { width: 2, height: 22, borderRadius: 99, backgroundColor: c.green },
   dotRow: { flexDirection: 'row', gap: 10, height: 20 },
   dot: { width: 11, height: 11, borderRadius: 99, backgroundColor: c.green },
   track: { width: '78%', maxWidth: 260, height: 9, borderRadius: 99, overflow: 'hidden', marginTop: 22, backgroundColor: '#dde6f1' },
