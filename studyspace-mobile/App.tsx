@@ -1,8 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Linking, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, type ViewStyle } from 'react-native';
 
-type Screen = 'home' | 'login' | 'loading' | 'rooms' | 'detail' | 'success' | 'profile' | 'profileData' | 'bookings';
+type Screen = 'home' | 'login' | 'loading' | 'rooms' | 'detail' | 'success' | 'profile' | 'profileData' | 'bookings' | 'campus';
 type SlotId = 'morning' | 'afternoon' | 'day';
 type Booking = { start: number; end: number };
 type Room = { id: string; name: string; building: string; floor: string; capacity: number; equipment: string[]; bookings: Booking[] };
@@ -70,9 +70,22 @@ const profileRows = [
 
 const profileBookings = [
   { room: 'B204', day: 'Heute', building: 'Gebäude B', slot: 'Nachmittag · 13:00 bis 18:00 Uhr' },
-  { room: 'Bib-22', day: 'Mo, 22.06.', building: 'Bibliothek', slot: 'Vormittag · 08:00 bis 13:00 Uhr' },
+  { room: 'Bib-22', day: 'Mo, 22.06.', building: 'Bibliothek', slot: 'Vormittag - 08:00 bis 13:00 Uhr' },
   { room: 'H205', day: 'Di, 23.06.', building: 'Gebäude H', slot: 'Ganzer Tag · 08:00 bis 18:00 Uhr' },
   { room: 'Media-2', day: 'Do, 25.06.', building: 'Medienlabor', slot: 'Nachmittag · 13:00 bis 18:00 Uhr' },
+];
+
+const campusBuildings: { name: string; short: string; style: ViewStyle; entrance?: boolean }[] = [
+  { name: 'Gebäude A', short: 'A', style: { left: '6%', top: '9%', width: '23%', height: 70 } },
+  { name: 'MakerSpace', short: 'Make', style: { left: '38%', top: '5%', width: '24%', height: 64 } },
+  { name: 'Gebäude B', short: 'B', style: { right: '6%', top: '9%', width: '23%', height: 70 } },
+  { name: 'Bibliothek', short: 'Bib', style: { left: '5%', top: '33%', width: '24%', height: 92 }, entrance: true },
+  { name: 'Gebäude H', short: 'H', style: { right: '5%', top: '31%', width: '23%', height: 78 } },
+  { name: 'Gebäude C', short: 'C', style: { right: '5%', top: '52%', width: '23%', height: 74 } },
+  { name: 'Gebäude F', short: 'F', style: { left: '5%', top: '56%', width: '23%', height: 74 } },
+  { name: 'Gebäude D', short: 'D', style: { left: '10%', bottom: '7%', width: '22%', height: 68 } },
+  { name: 'Gebäude J', short: 'J', style: { left: '39%', bottom: '5%', width: '22%', height: 64 } },
+  { name: 'Medienlabor', short: 'Medien', style: { right: '8%', bottom: '7%', width: '27%', height: 68 } },
 ];
 
 const time = (minutes: number) => `${Math.floor(minutes / 60).toString().padStart(2, '0')}:${(minutes % 60).toString().padStart(2, '0')}`;
@@ -136,6 +149,8 @@ export default function App() {
   const selectedRoom = rooms.find((room) => room.id === selectedRoomId) ?? null;
   const availableSlots = selectedRoom ? optionsFor(selectedRoom) : [];
   const freeCount = rooms.filter((room) => statusFor(room, selectedDay.isToday) === 'free').length;
+  const campusDay = days[0];
+  const campusRooms = selectedDayKey === campusDay.key ? rooms : roomsFor(campusDay);
 
   useEffect(() => {
     if (screen !== 'loading') return;
@@ -251,9 +266,10 @@ export default function App() {
           <TouchableOpacity style={[styles.primary, styles.successButton]} onPress={goRooms}><Text style={styles.primaryText}>Zurück zur Übersicht</Text></TouchableOpacity>
         </View>
       )}
-      {screen === 'profile' && <ProfileMenu onBack={goRooms} onData={() => setScreen('profileData')} onBookings={() => setScreen('bookings')} />}
+      {screen === 'profile' && <ProfileMenu onBack={goRooms} onData={() => setScreen('profileData')} onBookings={() => setScreen('bookings')} onCampus={() => setScreen('campus')} />}
       {screen === 'profileData' && <ProfileData onBack={() => setScreen('profile')} />}
       {screen === 'bookings' && <Bookings onBack={() => setScreen('profile')} />}
+      {screen === 'campus' && <CampusView onBack={() => setScreen('profile')} day={campusDay} rooms={campusRooms} />}
     </SafeAreaView>
   );
 }
@@ -291,12 +307,13 @@ function DayPanel({ days, selectedKey, onPick, onClose }: { days: Workday[]; sel
   return <View style={styles.overlay}><TouchableOpacity style={styles.backdrop} onPress={onClose} /><View style={styles.panel}><View style={styles.row}><View><Text style={styles.kicker}>Arbeitswoche</Text><Text style={styles.panelTitle}>Freie Tage wählen</Text></View><TouchableOpacity style={styles.close} onPress={onClose}><Text style={styles.closeText}>×</Text></TouchableOpacity></View><View style={styles.dayGrid}>{days.map((day) => { const active = selectedKey === day.key; const count = roomsFor(day).filter((room) => statusFor(room, day.isToday) === 'free').length; return <TouchableOpacity key={day.key} style={[styles.dayTile, active && styles.dayTileActive]} onPress={() => onPick(day)}><Text style={[styles.dayLabel, active && styles.white]}>{day.label}</Text><Text style={[styles.dayDate, active && styles.white]}>{day.date}</Text><Text style={[styles.dayCount, active && styles.white]}>{count} frei</Text></TouchableOpacity>; })}</View><View style={styles.campus}><Text style={styles.meta}>Aktueller Campus</Text><Text style={styles.campusText}>HSNR Campus MG</Text></View></View></View>;
 }
 
-function ProfileMenu({ onBack, onData, onBookings }: { onBack: () => void; onData: () => void; onBookings: () => void }) {
-  return <ScrollView style={styles.screen} contentContainerStyle={styles.scroll}><Back onPress={onBack} /><View style={styles.profileHero}><View style={styles.bigAvatar}><Text style={styles.bigAvatarText}>MS</Text></View><Text style={styles.heroTitle}>Mira Schneider</Text><Text style={styles.heroSub}>Studentin · BBW · HSNR Campus MG</Text></View><ProfileAction title="Profildaten" sub="Matrikelnummer, Campus und Zugang anzeigen" onPress={onData} /><ProfileAction title="Meine Buchungen" sub="Gebuchte Räume und Tage ansehen" onPress={onBookings} /></ScrollView>;
+function ProfileMenu({ onBack, onData, onBookings, onCampus }: { onBack: () => void; onData: () => void; onBookings: () => void; onCampus: () => void }) {
+  return <ScrollView style={styles.screen} contentContainerStyle={styles.scroll}><Back onPress={onBack} /><View style={styles.profileHero}><View style={styles.bigAvatar}><Text style={styles.bigAvatarText}>MS</Text></View><Text style={styles.heroTitle}>Mira Schneider</Text><Text style={styles.heroSub}>Studentin · BBW · HSNR Campus MG</Text></View><ProfileAction title="Profildaten" sub="Matrikelnummer, Campus und Zugang anzeigen" onPress={onData} /><ProfileAction title="Meine Buchungen" sub="Gebuchte Räume und Tage ansehen" onPress={onBookings} /><ProfileAction title="Mein Campus" sub="Campuskarte und freie Gebäude ansehen" onPress={onCampus} /></ScrollView>;
 }
 
 function ProfileAction({ title, sub, onPress }: { title: string; sub: string; onPress: () => void }) {
-  return <TouchableOpacity style={styles.profileAction} onPress={onPress}><Text style={styles.actionIcon}>{title === 'Profildaten' ? 'ID' : 'BK'}</Text><View style={styles.grow}><Text style={styles.actionTitle}>{title}</Text><Text style={styles.meta}>{sub}</Text></View><Text style={styles.arrow}>›</Text></TouchableOpacity>;
+  const icon = title === 'Profildaten' ? 'ID' : title === 'Mein Campus' ? 'MG' : 'BK';
+  return <TouchableOpacity style={styles.profileAction} onPress={onPress}><Text style={styles.actionIcon}>{icon}</Text><View style={styles.grow}><Text style={styles.actionTitle}>{title}</Text><Text style={styles.meta}>{sub}</Text></View><Text style={styles.arrow}>›</Text></TouchableOpacity>;
 }
 
 function ProfileData({ onBack }: { onBack: () => void }) {
@@ -305,6 +322,48 @@ function ProfileData({ onBack }: { onBack: () => void }) {
 
 function Bookings({ onBack }: { onBack: () => void }) {
   return <ScrollView style={styles.screen} contentContainerStyle={styles.scroll}><Back onPress={onBack} /><Text style={styles.title}>Meine Buchungen</Text><Text style={styles.sub}>Hier sind deine Buchungen. Bitte nutze Räume verantwortungsvoll, damit alle Studis etwas davon haben.</Text>{profileBookings.map((booking) => <View style={styles.bookingCard} key={`${booking.room}-${booking.day}`}><Text style={styles.roomName}>{booking.room}</Text><Text style={styles.meta}>{booking.building}</Text><View style={styles.bookingDate}><Text style={styles.dayCount}>{booking.day}</Text><Text style={styles.cardMeta}>{booking.slot}</Text></View></View>)}</ScrollView>;
+}
+
+function CampusView({ onBack, day, rooms }: { onBack: () => void; day: Workday; rooms: Room[] }) {
+  const openCampus = async () => {
+    const url = 'https://www.google.com/maps/search/?api=1&query=Hochschule%20Niederrhein%20Campus%20M%C3%B6nchengladbach';
+    const supported = await Linking.canOpenURL(url);
+    if (supported) Linking.openURL(url);
+    else Alert.alert('Adresse', 'HSNR Campus Mönchengladbach');
+  };
+  const hasFreeRoom = (building: string) => rooms.some((room) => room.building === building && optionsFor(room).length > 0);
+  const freeBuildings = campusBuildings.filter((building) => hasFreeRoom(building.name)).length;
+
+  return (
+    <View style={styles.screen}>
+      <ScrollView contentContainerStyle={styles.scroll}>
+        <Back onPress={onBack} />
+        <Text style={styles.kicker}>{day.isToday ? 'Heute' : `${day.short}. ${day.date}`}</Text>
+        <Text style={styles.title}>Mein Campus</Text>
+        <Text style={styles.sub}>Der HSNR MG Campus auf einen Blick. Grün markierte Gebäude haben an diesem Tag freie Räume.</Text>
+        <View style={styles.mapCard}>
+          <View style={styles.campusPark}><Text style={styles.parkText}>Campuspark</Text></View>
+          <View style={styles.walkwayHorizontal} />
+          <View style={styles.walkwayVertical} />
+          {campusBuildings.map((building) => {
+            const available = hasFreeRoom(building.name);
+            return (
+              <View key={building.name} style={[styles.mapBuilding, building.style, available && styles.mapBuildingFree]}>
+                <Text style={[styles.mapBuildingShort, available && styles.mapBuildingShortFree]}>{building.short}</Text>
+                <Text style={[styles.mapBuildingName, available && styles.mapBuildingNameFree]}>{building.name}</Text>
+                {building.entrance && <View style={styles.entrance}><Text style={styles.entranceText}>Eingang</Text></View>}
+              </View>
+            );
+          })}
+        </View>
+        <View style={styles.campusSummary}>
+          <Text style={styles.actionTitle}>HSNR Campus MG</Text>
+          <Text style={styles.meta}>{freeBuildings} Gebäude mit freien Lernräumen für {day.isToday ? 'heute' : `${day.short}. ${day.date}`}.</Text>
+        </View>
+      </ScrollView>
+      <TouchableOpacity style={styles.mapButton} onPress={openCampus}><Text style={styles.mapButtonIcon}>↗</Text><Text style={styles.mapButtonText}>Maps</Text></TouchableOpacity>
+    </View>
+  );
 }
 
 function Back({ onPress }: { onPress: () => void }) {
@@ -442,4 +501,21 @@ const styles = StyleSheet.create({
   hint: { marginTop: 16, borderRadius: 18, padding: 16, backgroundColor: c.greenSoft },
   bookingCard: { borderRadius: 20, borderWidth: 1, borderColor: c.border, padding: 17, marginTop: 12, backgroundColor: c.card },
   bookingDate: { marginTop: 14, borderRadius: 14, padding: 12, backgroundColor: '#f8fafc' },
+  mapCard: { height: 430, borderRadius: 26, borderWidth: 1, borderColor: c.border, overflow: 'hidden', marginTop: 8, backgroundColor: '#eef4f1' },
+  campusPark: { position: 'absolute', left: '34%', top: '32%', width: '32%', height: '32%', borderRadius: 999, alignItems: 'center', justifyContent: 'center', backgroundColor: '#dff4e8', borderWidth: 1, borderColor: '#bfe8d0' },
+  parkText: { color: c.green, fontSize: 13, fontWeight: '900' },
+  walkwayHorizontal: { position: 'absolute', left: '8%', right: '8%', top: '49%', height: 12, borderRadius: 999, backgroundColor: '#d9e1ea' },
+  walkwayVertical: { position: 'absolute', top: '9%', bottom: '9%', left: '49%', width: 12, borderRadius: 999, backgroundColor: '#d9e1ea' },
+  mapBuilding: { position: 'absolute', borderRadius: 18, borderWidth: 1, borderColor: '#d6dee9', alignItems: 'center', justifyContent: 'center', padding: 8, backgroundColor: c.card, shadowColor: '#1b2a41', shadowOpacity: 0.08, shadowRadius: 14, elevation: 3 },
+  mapBuildingFree: { borderColor: c.green, backgroundColor: c.greenSoft },
+  mapBuildingShort: { color: c.navy, fontSize: 20, fontWeight: '900' },
+  mapBuildingShortFree: { color: c.green },
+  mapBuildingName: { marginTop: 3, color: c.muted, fontSize: 11, fontWeight: '800', textAlign: 'center' },
+  mapBuildingNameFree: { color: c.navy },
+  entrance: { position: 'absolute', right: -8, bottom: 10, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 4, backgroundColor: c.navy },
+  entranceText: { color: '#fff', fontSize: 10, fontWeight: '900' },
+  campusSummary: { marginTop: 16, borderRadius: 18, borderWidth: 1, borderColor: c.border, padding: 16, backgroundColor: c.card },
+  mapButton: { position: 'absolute', right: 20, bottom: 22, height: 58, borderRadius: 19, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 18, backgroundColor: c.navy, elevation: 8 },
+  mapButtonIcon: { color: '#fff', fontSize: 21, fontWeight: '900' },
+  mapButtonText: { color: '#fff', fontSize: 14, fontWeight: '900' },
 });
