@@ -365,7 +365,7 @@ function CampusView({ onBack, day, rooms }: { onBack: () => void; day: Workday; 
         </View>
         <View style={styles.campusSummary}>
           <Text style={styles.actionTitle}>HSNR Campus MG</Text>
-          <Text style={styles.meta}>{freeBuildings} Gebäude mit freien Lernräumen für {day.isToday ? 'heute' : `${day.short}. ${day.date}`}.</Text>
+          <Text style={styles.meta}>{freeBuildings} Gebäude mit freien Lernräumen des FB08 für {day.isToday ? 'heute' : `${day.short}. ${day.date}`}</Text>
         </View>
       </ScrollView>
       <TouchableOpacity style={styles.mapButton} onPress={openCampus}><Text style={styles.mapButtonIcon}>↗</Text><Text style={styles.mapButtonText}>Maps</Text></TouchableOpacity>
