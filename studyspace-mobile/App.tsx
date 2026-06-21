@@ -75,7 +75,7 @@ const profileBookings = [
   { room: 'Z202', day: 'Do, 25.06.', building: 'Gebäude Z', slot: 'Nachmittag · 13:00 bis 18:00 Uhr' },
 ];
 
-const campusBuildings: { name: string; short: string; style: ViewStyle; entrance?: boolean }[] = [
+const campusBuildings: { name: string; short: string; style: ViewStyle }[] = [
   { name: 'Gebäude Y1', short: 'Y1', style: { left: '19%', top: '8%', width: '12%', height: 76 } },
   { name: 'Gebäude Y2', short: 'Y2', style: { left: '24%', top: '40%', width: '12%', height: 42 } },
   { name: 'Gebäude Z', short: 'Z', style: { right: '17%', top: '16%', width: '37%', height: 86 } },
@@ -83,7 +83,7 @@ const campusBuildings: { name: string; short: string; style: ViewStyle; entrance
   { name: 'Gebäude S', short: 'S', style: { left: '42%', top: '56%', width: '12%', height: 86 } },
   { name: 'Gebäude T', short: 'T', style: { left: '57%', top: '42%', width: '11%', height: 64 } },
   { name: 'Gebäude X', short: 'X', style: { left: '55%', top: '61%', width: '11%', height: 42 } },
-  { name: 'Gebäude W', short: 'W', style: { right: '15%', bottom: '17%', width: '34%', height: 54 }, entrance: true },
+  { name: 'Gebäude W', short: 'W', style: { right: '15%', bottom: '17%', width: '34%', height: 54 } },
   { name: 'Gebäude F', short: 'F', style: { left: '12%', bottom: '15%', width: '25%', height: 44 } },
 ];
 
@@ -345,7 +345,6 @@ function CampusView({ onBack, day, rooms }: { onBack: () => void; day: Workday; 
           <View style={styles.streetRight}><Text style={styles.streetTextVertical}>Theodor-Heuss-Str.</Text></View>
           <View style={styles.streetBottom}><Text style={styles.streetText}>Webschulstraße</Text></View>
           <View style={styles.audimaxLabel}><Text style={styles.tinyLabel}>Audimax</Text><Text style={styles.tinyStrong}>V1</Text><Text style={styles.tinyStrong}>V2</Text></View>
-          <View style={styles.languageLabel}><Text style={styles.tinyLabel}>Sprachenzentrum</Text><Text style={styles.tinySmall}>4.OG</Text></View>
           <View style={styles.parkingZone}><Text style={styles.parkingText}>P</Text></View>
           <View style={styles.campusNode} />
           <View style={styles.walkwayTop} />
@@ -357,8 +356,6 @@ function CampusView({ onBack, day, rooms }: { onBack: () => void; day: Workday; 
             return (
               <View key={building.name} style={[styles.mapBuilding, building.style, available && styles.mapBuildingFree]}>
                 <Text style={[styles.mapBuildingShort, available && styles.mapBuildingShortFree]}>{building.short}</Text>
-                <Text style={[styles.mapBuildingName, available && styles.mapBuildingNameFree]}>{building.name}</Text>
-                {building.entrance && <View style={styles.entrance}><Text style={styles.entranceText}>1</Text></View>}
               </View>
             );
           })}
@@ -514,7 +511,7 @@ const styles = StyleSheet.create({
   streetRight: { position: 'absolute', right: 0, top: 0, bottom: 0, width: 34, alignItems: 'center', justifyContent: 'center', backgroundColor: '#b8bec7' },
   streetText: { color: c.gray, fontSize: 11, fontWeight: '900' },
   streetTextVertical: { color: c.text, fontSize: 14, fontWeight: '900', transform: [{ rotate: '-90deg' }], width: 150, textAlign: 'center' },
-  parkingZone: { position: 'absolute', right: '5%', top: '45%', width: '11%', height: '28%', alignItems: 'center', justifyContent: 'center', backgroundColor: '#eef0f3' },
+  parkingZone: { position: 'absolute', right: '12%', top: '47%', width: '9%', height: '19%', alignItems: 'center', justifyContent: 'center', backgroundColor: '#eef0f3' },
   parkingText: { color: '#a5acb8', fontSize: 44, fontWeight: '900' },
   campusNode: { position: 'absolute', left: '65%', top: '49%', width: 28, height: 28, borderRadius: 99, backgroundColor: '#b8bec7' },
   walkwayTop: { position: 'absolute', left: '31%', right: '14%', top: '27%', height: 8, borderRadius: 999, backgroundColor: '#b8bec7' },
@@ -522,18 +519,12 @@ const styles = StyleSheet.create({
   walkwayBottom: { position: 'absolute', left: '10%', right: '5%', bottom: '12%', height: 8, borderRadius: 999, backgroundColor: '#b8bec7' },
   walkwayVertical: { position: 'absolute', top: '17%', bottom: '12%', left: '69%', width: 8, borderRadius: 999, backgroundColor: '#b8bec7' },
   audimaxLabel: { position: 'absolute', right: '17%', top: '42%', width: '17%', minHeight: 74, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: '#075b9f' },
-  languageLabel: { position: 'absolute', right: '16%', top: '20%', width: '28%', minHeight: 38, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: '#075b9f' },
   tinyLabel: { color: '#fff', fontSize: 10, fontWeight: '900', textAlign: 'center' },
   tinyStrong: { color: '#fff', fontSize: 21, fontWeight: '900', lineHeight: 23 },
-  tinySmall: { color: '#fff', fontSize: 9, fontWeight: '800' },
   mapBuilding: { position: 'absolute', borderRadius: 9, borderWidth: 1, borderColor: '#0a4f8a', alignItems: 'center', justifyContent: 'center', padding: 5, backgroundColor: '#075b9f', shadowColor: '#1b2a41', shadowOpacity: 0.08, shadowRadius: 14, elevation: 3 },
   mapBuildingFree: { borderColor: c.green, backgroundColor: c.green },
   mapBuildingShort: { color: '#fff', fontSize: 17, fontWeight: '900' },
   mapBuildingShortFree: { color: '#fff' },
-  mapBuildingName: { marginTop: 2, color: '#e7f1fb', fontSize: 9, fontWeight: '800', textAlign: 'center' },
-  mapBuildingNameFree: { color: '#fff' },
-  entrance: { position: 'absolute', right: -8, top: -8, width: 22, height: 22, borderRadius: 999, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#fff', backgroundColor: c.green },
-  entranceText: { color: '#fff', fontSize: 11, fontWeight: '900' },
   campusSummary: { marginTop: 16, borderRadius: 18, borderWidth: 1, borderColor: c.border, padding: 16, backgroundColor: c.card },
   mapButton: { position: 'absolute', right: 20, bottom: 22, height: 58, borderRadius: 19, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 18, backgroundColor: c.navy, elevation: 8 },
   mapButtonIcon: { color: '#fff', fontSize: 21, fontWeight: '900' },
