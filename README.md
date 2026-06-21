@@ -1,21 +1,49 @@
 # StudySpace
 
-StudySpace ist ein klickbarer Expo React Native PoC für eine Hochschul-App zur Buchung freier Lernräume.
+StudySpace ist ein klickbarer Proof‑of‑Concept (PoC) mit zwei Teilen:
 
-Das Projekt ist aktuell nur eine Idee und ein Prototyp für den Fachbereich 08. Es gibt kein Backend, keine echte Datenbank und keinen echten Login. Alle angezeigten Daten sind Dummy-Daten direkt in der App.
+- `studyspace-mobile` – Expo React Native App (Mobile PoC)
+- `studyspace-website` – Lokale Website (Web PoC)
+
+Beide Teile nutzen Dummy‑Daten; es gibt kein Backend oder echten Login.
+
+## Voraussetzungen
+
+- Node.js und npm installiert
+- Für die Mobile‑App: Expo (oder Expo Go auf dem Smartphone)
 
 ## Starten
 
-Zuerst in den App-Ordner wechseln:
+Mobile (Expo)
+
+1. In das Mobile‑Verzeichnis wechseln:
 
 ```bash
 cd studyspace-mobile
 ```
 
-Dann die App mit Expo starten:
+2. App starten:
 
 ```bash
 npx expo start -c
 ```
 
-Anschließend kann die App mit Expo Go auf dem Smartphone geöffnet werden.
+3. Öffne die App mit Expo Go auf dem Smartphone oder einem Emulator (siehe Terminalausgabe).
+
+Website (lokale Entwicklung)
+
+1. In das Website‑Verzeichnis wechseln:
+
+```bash
+cd studyspace-website
+```
+
+2. Abhängigkeiten installieren (falls noch nicht geschehen) und Entwicklung starten:
+
+```bash
+npm install
+npm run dev
+```
+
+3. Folge der Terminalausgabe für die lokale URL (in der Regel `http://localhost:5173` oder eine andere angezeigte Adresse).
+
