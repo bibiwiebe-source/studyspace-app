@@ -76,15 +76,15 @@ const profileBookings = [
 ];
 
 const campusBuildings: { name: string; short: string; style: ViewStyle }[] = [
-  { name: 'Gebäude Y1', short: 'Y1', style: { left: '19%', top: '8%', width: '12%', height: 76 } },
-  { name: 'Gebäude Y2', short: 'Y2', style: { left: '24%', top: '40%', width: '12%', height: 42 } },
+  { name: 'Gebäude Y1', short: 'Y1', style: { left: '6%', top: '8%', width: '12%', height: 76 } },
+  { name: 'Gebäude Y2', short: 'Y2', style: { left: '10%', top: '40%', width: '12%', height: 42 } },
   { name: 'Gebäude Z', short: 'Z', style: { right: '17%', top: '16%', width: '37%', height: 86 } },
-  { name: 'Gebäude R', short: 'R', style: { left: '42%', top: '36%', width: '12%', height: 76 } },
-  { name: 'Gebäude S', short: 'S', style: { left: '42%', top: '56%', width: '12%', height: 86 } },
-  { name: 'Gebäude T', short: 'T', style: { left: '57%', top: '42%', width: '11%', height: 64 } },
-  { name: 'Gebäude X', short: 'X', style: { left: '55%', top: '61%', width: '11%', height: 42 } },
+  { name: 'Gebäude R', short: 'R', style: { left: '39%', top: '56%', width: '12%', height: 76 } },
+  { name: 'Gebäude S', short: 'S', style: { left: '39%', top: '70%', width: '12%', height: 86 } },
+  { name: 'Gebäude T', short: 'T', style: { left: '55%', top: '42%', width: '11%', height: 64 } },
+  { name: 'Gebäude X', short: 'X', style: { left: '52%', top: '61%', width: '11%', height: 42 } },
   { name: 'Gebäude W', short: 'W', style: { right: '15%', bottom: '17%', width: '34%', height: 54 } },
-  { name: 'Gebäude F', short: 'F', style: { left: '12%', bottom: '15%', width: '25%', height: 44 } },
+  { name: 'Gebäude F', short: 'F', style: { left: '3%', bottom: '15%', width: '25%', height: 44 } },
 ];
 
 const time = (minutes: number) => `${Math.floor(minutes / 60).toString().padStart(2, '0')}:${(minutes % 60).toString().padStart(2, '0')}`;
@@ -344,13 +344,13 @@ function CampusView({ onBack, day, rooms }: { onBack: () => void; day: Workday; 
           <View style={styles.neighborBlock} />
           <View style={styles.streetRight}><Text style={styles.streetTextVertical}>Theodor-Heuss-Str.</Text></View>
           <View style={styles.streetBottom}><Text style={styles.streetText}>Webschulstraße</Text></View>
-          <View style={styles.audimaxLabel}><Text style={styles.tinyLabel}>Audimax</Text><Text style={styles.tinyStrong}>V1</Text><Text style={styles.tinyStrong}>V2</Text></View>
+          <View style={styles.audimaxLabel}><Text style={styles.tinyLabel}>V1/V2</Text><Text style={styles.tinyStrong}></Text><Text style={styles.tinyStrong}></Text></View>
           <View style={styles.parkingZone}><Text style={styles.parkingText}>P</Text></View>
           <View style={styles.campusNode} />
           <View style={styles.walkwayTop} />
           <View style={styles.walkwayMid} />
-          <View style={styles.walkwayBottom} />
           <View style={styles.walkwayVertical} />
+          <View style={styles.streetVerticalThin} />
           {campusBuildings.map((building) => {
             const available = hasFreeRoom(building.name);
             return (
@@ -514,11 +514,12 @@ const styles = StyleSheet.create({
   parkingZone: { position: 'absolute', right: '12%', top: '47%', width: '9%', height: '19%', alignItems: 'center', justifyContent: 'center', backgroundColor: '#eef0f3' },
   parkingText: { color: '#a5acb8', fontSize: 44, fontWeight: '900' },
   campusNode: { position: 'absolute', left: '65%', top: '49%', width: 28, height: 28, borderRadius: 99, backgroundColor: '#b8bec7' },
-  walkwayTop: { position: 'absolute', left: '31%', right: '14%', top: '27%', height: 8, borderRadius: 999, backgroundColor: '#b8bec7' },
-  walkwayMid: { position: 'absolute', left: '29%', right: '17%', top: '51%', height: 8, borderRadius: 999, backgroundColor: '#b8bec7', transform: [{ rotate: '9deg' }] },
-  walkwayBottom: { position: 'absolute', left: '10%', right: '5%', bottom: '12%', height: 8, borderRadius: 999, backgroundColor: '#b8bec7' },
-  walkwayVertical: { position: 'absolute', top: '17%', bottom: '12%', left: '69%', width: 8, borderRadius: 999, backgroundColor: '#b8bec7' },
-  audimaxLabel: { position: 'absolute', right: '17%', top: '42%', width: '17%', minHeight: 74, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: '#075b9f' },
+  walkwayTop: { position: 'absolute', left: '16%', right: '20%', top: '20%', height: 8, borderRadius: 999, backgroundColor: '#b8bec7' },
+  walkwayMid: { position: 'absolute', left: '10%', right: '20%', top: '48%', height: 8, borderRadius: 999, backgroundColor: '#b8bec7', transform: [{ rotate: '9deg' }] },
+  /* removed walkwayBottom (small horizontal street under W and F) */
+  walkwayVertical: { position: 'absolute', top: '18%', bottom: 0, left: '69%', width: 8, borderRadius: 999, backgroundColor: '#b8bec7' },
+  streetVerticalThin: { position: 'absolute', top: '0%', bottom: 0, left: '33%', width: 6, borderRadius: 999, backgroundColor: '#b8bec7', transform: [{ rotate: '6deg' }] },
+  audimaxLabel: { position: 'absolute', right: '15%', top: '42%', width: '13%', minHeight: 74, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: '#075b9f' },
   tinyLabel: { color: '#fff', fontSize: 10, fontWeight: '900', textAlign: 'center' },
   tinyStrong: { color: '#fff', fontSize: 21, fontWeight: '900', lineHeight: 23 },
   mapBuilding: { position: 'absolute', borderRadius: 9, borderWidth: 1, borderColor: '#0a4f8a', alignItems: 'center', justifyContent: 'center', padding: 5, backgroundColor: '#075b9f', shadowColor: '#1b2a41', shadowOpacity: 0.08, shadowRadius: 14, elevation: 3 },
