@@ -1,122 +1,45 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { AppPreview } from './components/AppPreview';
+import { Features } from './components/Features';
+import { Footer } from './components/Footer';
+import { Hero } from './components/Hero';
+import { Reveal } from './components/Reveal';
+import { StatusTimeline } from './components/StatusTimeline';
+import { TextSection } from './components/TextSection';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const currentYear = new Date().getFullYear();
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <main>
+      <Hero />
+      <Features />
+      <AppPreview />
+      <StatusTimeline />
+      <Reveal>
+        <TextSection
+          eyebrow="Über uns"
+          title="Von Studierenden für Studierende."
+          text={[
+            'Wir sind selbst Studierende der Betriebswirtschaftslehre und standen während unseres Studiums regelmäßig vor dem gleichen Problem: Freie Lernräume waren oft schwer zu finden und vorhandene Räume wurden nicht optimal genutzt.',
+            'Aus diesem Grund entstand die Idee zu StudySpace. Wir wollten eine einfache, moderne und digitale Lösung schaffen, die Studierenden dabei hilft, freie Lern- und Gruppenräume schnell zu finden und zu buchen.',
+            'StudySpace wird von Studierenden für Studierende entwickelt. Unser Ziel ist es, den Studienalltag angenehmer zu gestalten und die Nutzung bestehender Lernflächen an Hochschulen zu verbessern.',
+          ]}
+        />
+      </Reveal>
+      <Reveal>
+        <TextSection
+          eyebrow="Unsere Vision"
+          title="Weniger Suchen. Mehr Lernen."
+          text={[
+            'Wir glauben, dass Studierende ihre Zeit nicht mit der Suche nach freien Lernplätzen verbringen sollten. StudySpace soll Hochschulen dabei unterstützen, vorhandene Räume effizienter zu nutzen und Studierenden eine moderne Nutzererfahrung bieten.',
+          ]}
+          highlight
+        />
+      </Reveal>
+      <Footer year={currentYear} />
+    </main>
+  );
 }
 
-export default App
+export default App;
