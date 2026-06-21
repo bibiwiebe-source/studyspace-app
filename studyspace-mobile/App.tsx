@@ -21,41 +21,41 @@ const slots = [
 
 const todayRooms: Room[] = [
   { id: 'w101', name: 'W101', building: 'Gebäude W', floor: 'Etage 1', capacity: 6, equipment: ['Beamer', 'Whiteboard', 'Steckdosen', 'WLAN', 'USB-C Dock'], bookings: [{ start: MORNING, end: AFTERNOON }] },
-  { id: 'v204', name: 'V2.04', building: 'Gebäude V2', floor: 'Etage 2', capacity: 4, equipment: ['Monitor', 'Steckdosen', 'WLAN', 'HDMI', 'Ergostühle'], bookings: [] },
-  { id: 'n015', name: 'N015', building: 'Gebäude N', floor: 'Erdgeschoss', capacity: 8, equipment: ['Bibliothek', 'Whiteboard', 'Gruppentisch', 'WLAN', 'Akustikpaneele'], bookings: [{ start: AFTERNOON, end: END }] },
-  { id: 'r310', name: 'R310', building: 'Gebäude R', floor: 'Etage 3', capacity: 10, equipment: ['Beamer', 'Lautsprecher', 'Whiteboard', 'WLAN', 'Kamera'], bookings: [{ start: MORNING, end: END }] },
-  { id: 'z022', name: 'ZE-22', building: 'Gebäude Z / ZE', floor: 'Etage 2', capacity: 2, equipment: ['Sprachenzentrum', 'Steckdosen', 'WLAN', 'Leselampe'], bookings: [] },
-  { id: 'f021', name: 'F021', building: 'Gebäude F', floor: 'Erdgeschoss', capacity: 12, equipment: ['Smartboard', 'Beamer', 'WLAN', 'Konferenztisch'], bookings: [{ start: AFTERNOON, end: END }] },
-  { id: 't103', name: 'T103', building: 'Gebäude T', floor: 'Etage 1', capacity: 6, equipment: ['Monitorwand', 'Whiteboard', 'WLAN', 'Audiointerface'], bookings: [{ start: MORNING, end: AFTERNOON }] },
-  { id: 's404', name: 'S404', building: 'Gebäude S', floor: 'Etage 4', capacity: 14, equipment: ['Smartboard', 'Whiteboard', 'WLAN', 'Hybrid-Meeting'], bookings: [{ start: MORNING, end: END }] },
+  { id: 'w204', name: 'W204', building: 'Gebäude W', floor: 'Etage 2', capacity: 4, equipment: ['Monitor', 'Steckdosen', 'WLAN', 'HDMI', 'Ergostühle'], bookings: [] },
+  { id: 'z015', name: 'Z015', building: 'Gebäude Z', floor: 'Erdgeschoss', capacity: 8, equipment: ['Sprachenzentrum', 'Whiteboard', 'Gruppentisch', 'WLAN', 'Akustikpaneele'], bookings: [{ start: AFTERNOON, end: END }] },
+  { id: 'y110', name: 'Y1.10', building: 'Gebäude Y1', floor: 'Etage 1', capacity: 10, equipment: ['Beamer', 'Lautsprecher', 'Whiteboard', 'WLAN', 'Kamera'], bookings: [{ start: MORNING, end: END }] },
+  { id: 'z022', name: 'Z022', building: 'Gebäude Z', floor: 'Etage 2', capacity: 2, equipment: ['Ruhiger Bereich', 'Steckdosen', 'WLAN', 'Leselampe'], bookings: [] },
+  { id: 'w021', name: 'W021', building: 'Gebäude W', floor: 'Erdgeschoss', capacity: 12, equipment: ['Audimax nah', 'Beamer', 'WLAN', 'Konferenztisch'], bookings: [{ start: AFTERNOON, end: END }] },
+  { id: 'y103', name: 'Y1.03', building: 'Gebäude Y1', floor: 'Etage 1', capacity: 6, equipment: ['Monitorwand', 'Whiteboard', 'WLAN', 'Audiointerface'], bookings: [{ start: MORNING, end: AFTERNOON }] },
+  { id: 'z404', name: 'Z404', building: 'Gebäude Z', floor: 'Etage 4', capacity: 14, equipment: ['Sprachenzentrum', 'Whiteboard', 'WLAN', 'Hybrid-Meeting'], bookings: [{ start: MORNING, end: END }] },
   { id: 'w220', name: 'W220', building: 'Gebäude W', floor: 'Etage 2', capacity: 4, equipment: ['Monitor', 'WLAN', 'Steckdosen', 'Glasboard'], bookings: [] },
 ];
 
 const futureSets: Room[][] = [
   [
     { id: 'y101', name: 'Y1.01', building: 'Gebäude Y1', floor: 'Etage 1', capacity: 6, equipment: ['MakerSpace nah', 'Whiteboard', 'WLAN'], bookings: [{ start: AFTERNOON, end: END }] },
-    { id: 'h205', name: 'H205', building: 'Gebäude H', floor: 'Etage 2', capacity: 8, equipment: ['Smartboard', 'USB-C Dock', 'WLAN'], bookings: [] },
-    { id: 'j030', name: 'J030', building: 'Gebäude J', floor: 'Erdgeschoss', capacity: 10, equipment: ['Beamer', 'Whiteboard', 'WLAN'], bookings: [{ start: MORNING, end: END }] },
+    { id: 'w205', name: 'W205', building: 'Gebäude W', floor: 'Etage 2', capacity: 8, equipment: ['Smartboard', 'USB-C Dock', 'WLAN'], bookings: [] },
+    { id: 'z030', name: 'Z030', building: 'Gebäude Z', floor: 'Erdgeschoss', capacity: 10, equipment: ['Beamer', 'Whiteboard', 'WLAN'], bookings: [{ start: MORNING, end: END }] },
   ],
   [
-    { id: 'v303', name: 'V1.03', building: 'Gebäude V1', floor: 'Etage 3', capacity: 5, equipment: ['Monitor', 'WLAN', 'Tageslicht'], bookings: [] },
+    { id: 'w303', name: 'W303', building: 'Gebäude W', floor: 'Etage 3', capacity: 5, equipment: ['Monitor', 'WLAN', 'Tageslicht'], bookings: [] },
     { id: 'w102', name: 'W102', building: 'Gebäude W', floor: 'Etage 1', capacity: 7, equipment: ['Smartboard', 'Whiteboard', 'WLAN'], bookings: [{ start: AFTERNOON, end: END }] },
-    { id: 'n231', name: 'N231', building: 'Gebäude N', floor: 'Etage 2', capacity: 2, equipment: ['Silent Zone', 'Steckdosen', 'WLAN'], bookings: [] },
+    { id: 'z231', name: 'Z231', building: 'Gebäude Z', floor: 'Etage 2', capacity: 2, equipment: ['Silent Zone', 'Steckdosen', 'WLAN'], bookings: [] },
   ],
   [
-    { id: 'i022', name: 'I022', building: 'Gebäude I', floor: 'Erdgeschoss', capacity: 6, equipment: ['Whiteboard', 'Pinnwand', 'WLAN'], bookings: [{ start: MORNING, end: AFTERNOON }] },
-    { id: 'g210', name: 'G210', building: 'Gebäude G', floor: 'Etage 2', capacity: 9, equipment: ['Smartboard', 'Lautsprecher', 'WLAN'], bookings: [] },
-    { id: 'r202', name: 'R202', building: 'Gebäude R', floor: 'Etage 2', capacity: 4, equipment: ['Arbeitsplätze', 'Audiointerface', 'WLAN'], bookings: [{ start: AFTERNOON, end: END }] },
+    { id: 'y022', name: 'Y1.22', building: 'Gebäude Y1', floor: 'Erdgeschoss', capacity: 6, equipment: ['Whiteboard', 'Pinnwand', 'WLAN'], bookings: [{ start: MORNING, end: AFTERNOON }] },
+    { id: 'w210', name: 'W210', building: 'Gebäude W', floor: 'Etage 2', capacity: 9, equipment: ['Smartboard', 'Lautsprecher', 'WLAN'], bookings: [] },
+    { id: 'z202', name: 'Z202', building: 'Gebäude Z', floor: 'Etage 2', capacity: 4, equipment: ['Arbeitsplätze', 'Audiointerface', 'WLAN'], bookings: [{ start: AFTERNOON, end: END }] },
   ],
   [
-    { id: 'k115', name: 'K115', building: 'Gebäude K', floor: 'Etage 1', capacity: 8, equipment: ['Beamer', 'Whiteboard', 'WLAN'], bookings: [] },
-    { id: 'q404', name: 'Q404', building: 'Gebäude Q', floor: 'Etage 4', capacity: 14, equipment: ['Smartboard', 'Hybrid-Meeting', 'WLAN'], bookings: [{ start: MORNING, end: END }] },
-    { id: 'e009', name: 'E009', building: 'Gebäude E', floor: 'Erdgeschoss', capacity: 5, equipment: ['Monitor', 'USB-C Dock', 'WLAN'], bookings: [] },
+    { id: 'y115', name: 'Y1.15', building: 'Gebäude Y1', floor: 'Etage 1', capacity: 8, equipment: ['Beamer', 'Whiteboard', 'WLAN'], bookings: [] },
+    { id: 'w404', name: 'W404', building: 'Gebäude W', floor: 'Etage 4', capacity: 14, equipment: ['Smartboard', 'Hybrid-Meeting', 'WLAN'], bookings: [{ start: MORNING, end: END }] },
+    { id: 'z009', name: 'Z009', building: 'Gebäude Z', floor: 'Erdgeschoss', capacity: 5, equipment: ['Monitor', 'USB-C Dock', 'WLAN'], bookings: [] },
   ],
   [
-    { id: 's018', name: 'S018', building: 'Gebäude S', floor: 'Erdgeschoss', capacity: 6, equipment: ['Whiteboard', 'Steckdosen', 'WLAN'], bookings: [{ start: AFTERNOON, end: END }] },
-    { id: 't220', name: 'T220', building: 'Gebäude T', floor: 'Etage 2', capacity: 10, equipment: ['Smartboard', 'Gruppentisch', 'WLAN'], bookings: [] },
-    { id: 'n340', name: 'N340', building: 'Gebäude N', floor: 'Etage 3', capacity: 4, equipment: ['Leselampen', 'Steckdosen', 'WLAN'], bookings: [] },
+    { id: 'w018', name: 'W018', building: 'Gebäude W', floor: 'Erdgeschoss', capacity: 6, equipment: ['Whiteboard', 'Steckdosen', 'WLAN'], bookings: [{ start: AFTERNOON, end: END }] },
+    { id: 'y220', name: 'Y1.20', building: 'Gebäude Y1', floor: 'Etage 2', capacity: 10, equipment: ['Smartboard', 'Gruppentisch', 'WLAN'], bookings: [] },
+    { id: 'z340', name: 'Z340', building: 'Gebäude Z', floor: 'Etage 3', capacity: 4, equipment: ['Leselampen', 'Steckdosen', 'WLAN'], bookings: [] },
   ],
 ];
 
@@ -69,32 +69,22 @@ const profileRows = [
 ];
 
 const profileBookings = [
-  { room: 'V2.04', day: 'Heute', building: 'Gebäude V2', slot: 'Nachmittag · 13:00 bis 18:00 Uhr' },
-  { room: 'ZE-22', day: 'Mo, 22.06.', building: 'Gebäude Z / ZE', slot: 'Vormittag - 08:00 bis 13:00 Uhr' },
-  { room: 'H205', day: 'Di, 23.06.', building: 'Gebäude H', slot: 'Ganzer Tag · 08:00 bis 18:00 Uhr' },
-  { room: 'R202', day: 'Do, 25.06.', building: 'Gebäude R', slot: 'Nachmittag · 13:00 bis 18:00 Uhr' },
+  { room: 'W204', day: 'Heute', building: 'Gebäude W', slot: 'Nachmittag · 13:00 bis 18:00 Uhr' },
+  { room: 'Z022', day: 'Mo, 22.06.', building: 'Gebäude Z', slot: 'Vormittag - 08:00 bis 13:00 Uhr' },
+  { room: 'Y1.15', day: 'Di, 23.06.', building: 'Gebäude Y1', slot: 'Ganzer Tag · 08:00 bis 18:00 Uhr' },
+  { room: 'Z202', day: 'Do, 25.06.', building: 'Gebäude Z', slot: 'Nachmittag · 13:00 bis 18:00 Uhr' },
 ];
 
 const campusBuildings: { name: string; short: string; style: ViewStyle; entrance?: boolean }[] = [
-  { name: 'Gebäude Q', short: 'Q', style: { left: '7%', top: '8%', width: '18%', height: 54 } },
-  { name: 'Gebäude O', short: 'O', style: { left: '9%', top: '23%', width: '17%', height: 58 } },
-  { name: 'Gebäude K', short: 'K', style: { left: '7%', top: '40%', width: '15%', height: 44 } },
-  { name: 'Gebäude I', short: 'I', style: { left: '15%', top: '50%', width: '17%', height: 54 } },
-  { name: 'Gebäude H', short: 'H', style: { left: '28%', top: '38%', width: '17%', height: 76 } },
-  { name: 'Gebäude G', short: 'G', style: { left: '43%', top: '54%', width: '20%', height: 50 }, entrance: true },
-  { name: 'Gebäude F', short: 'F', style: { left: '61%', top: '54%', width: '13%', height: 50 } },
-  { name: 'Gebäude E', short: 'E', style: { left: '21%', bottom: '11%', width: '16%', height: 46 } },
-  { name: 'Gebäude N', short: 'N', style: { left: '42%', bottom: '6%', width: '20%', height: 56 } },
-  { name: 'Gebäude Y1', short: 'Y1', style: { left: '55%', top: '12%', width: '16%', height: 58 } },
-  { name: 'Gebäude Y2', short: 'Y2', style: { left: '59%', top: '32%', width: '14%', height: 42 } },
-  { name: 'Gebäude R', short: 'R', style: { right: '18%', top: '29%', width: '14%', height: 60 } },
-  { name: 'Gebäude S', short: 'S', style: { right: '17%', top: '47%', width: '14%', height: 58 } },
-  { name: 'Gebäude T', short: 'T', style: { right: '12%', top: '34%', width: '13%', height: 54 } },
-  { name: 'Gebäude W', short: 'W', style: { right: '22%', top: '61%', width: '17%', height: 46 } },
-  { name: 'Gebäude V1', short: 'V1', style: { right: '5%', top: '33%', width: '14%', height: 48 } },
-  { name: 'Gebäude V2', short: 'V2', style: { right: '7%', top: '47%', width: '13%', height: 43 } },
-  { name: 'Gebäude Z / ZE', short: 'ZE', style: { right: '7%', top: '18%', width: '24%', height: 50 } },
-  { name: 'Gebäude J', short: 'J', style: { left: '18%', top: '70%', width: '22%', height: 58 } },
+  { name: 'Gebäude Y1', short: 'Y1', style: { left: '19%', top: '8%', width: '12%', height: 76 } },
+  { name: 'Gebäude Y2', short: 'Y2', style: { left: '24%', top: '40%', width: '12%', height: 42 } },
+  { name: 'Gebäude Z', short: 'Z', style: { right: '17%', top: '16%', width: '37%', height: 86 } },
+  { name: 'Gebäude R', short: 'R', style: { left: '42%', top: '36%', width: '12%', height: 76 } },
+  { name: 'Gebäude S', short: 'S', style: { left: '42%', top: '56%', width: '12%', height: 86 } },
+  { name: 'Gebäude T', short: 'T', style: { left: '57%', top: '42%', width: '11%', height: 64 } },
+  { name: 'Gebäude X', short: 'X', style: { left: '55%', top: '61%', width: '11%', height: 42 } },
+  { name: 'Gebäude W', short: 'W', style: { right: '15%', bottom: '17%', width: '34%', height: 54 }, entrance: true },
+  { name: 'Gebäude F', short: 'F', style: { left: '12%', bottom: '15%', width: '25%', height: 44 } },
 ];
 
 const time = (minutes: number) => `${Math.floor(minutes / 60).toString().padStart(2, '0')}:${(minutes % 60).toString().padStart(2, '0')}`;
@@ -351,12 +341,16 @@ function CampusView({ onBack, day, rooms }: { onBack: () => void; day: Workday; 
         <Text style={styles.title}>Mein Campus</Text>
         <Text style={styles.sub}>Der HSNR MG Campus auf einen Blick. Grün markierte Gebäude haben an diesem Tag freie Räume.</Text>
         <View style={styles.mapCard}>
-          <View style={styles.streetTop}><Text style={styles.streetText}>Südstraße</Text></View>
-          <View style={styles.streetLeft}><Text style={styles.streetTextVertical}>Rheydter Str.</Text></View>
+          <View style={styles.neighborBlock} />
           <View style={styles.streetRight}><Text style={styles.streetTextVertical}>Theodor-Heuss-Str.</Text></View>
           <View style={styles.streetBottom}><Text style={styles.streetText}>Webschulstraße</Text></View>
-          <View style={styles.campusPark}><Text style={styles.parkText}>Campusgrün</Text></View>
-          <View style={styles.walkwayHorizontal} />
+          <View style={styles.audimaxLabel}><Text style={styles.tinyLabel}>Audimax</Text><Text style={styles.tinyStrong}>V1</Text><Text style={styles.tinyStrong}>V2</Text></View>
+          <View style={styles.languageLabel}><Text style={styles.tinyLabel}>Sprachenzentrum</Text><Text style={styles.tinySmall}>4.OG</Text></View>
+          <View style={styles.parkingZone}><Text style={styles.parkingText}>P</Text></View>
+          <View style={styles.campusNode} />
+          <View style={styles.walkwayTop} />
+          <View style={styles.walkwayMid} />
+          <View style={styles.walkwayBottom} />
           <View style={styles.walkwayVertical} />
           {campusBuildings.map((building) => {
             const available = hasFreeRoom(building.name);
@@ -364,7 +358,7 @@ function CampusView({ onBack, day, rooms }: { onBack: () => void; day: Workday; 
               <View key={building.name} style={[styles.mapBuilding, building.style, available && styles.mapBuildingFree]}>
                 <Text style={[styles.mapBuildingShort, available && styles.mapBuildingShortFree]}>{building.short}</Text>
                 <Text style={[styles.mapBuildingName, available && styles.mapBuildingNameFree]}>{building.name}</Text>
-                {building.entrance && <View style={styles.entrance}><Text style={styles.entranceText}>Eingang</Text></View>}
+                {building.entrance && <View style={styles.entrance}><Text style={styles.entranceText}>1</Text></View>}
               </View>
             );
           })}
@@ -515,24 +509,31 @@ const styles = StyleSheet.create({
   bookingCard: { borderRadius: 20, borderWidth: 1, borderColor: c.border, padding: 17, marginTop: 12, backgroundColor: c.card },
   bookingDate: { marginTop: 14, borderRadius: 14, padding: 12, backgroundColor: '#f8fafc' },
   mapCard: { height: 430, borderRadius: 26, borderWidth: 1, borderColor: c.border, overflow: 'hidden', marginTop: 8, backgroundColor: '#f6f8fb' },
-  streetTop: { position: 'absolute', left: 0, right: 0, top: 0, height: 26, alignItems: 'center', justifyContent: 'center', backgroundColor: '#d7dde5' },
-  streetBottom: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: '#d7dde5' },
-  streetLeft: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: '#d7dde5' },
-  streetRight: { position: 'absolute', right: 0, top: 0, bottom: 0, width: 30, alignItems: 'center', justifyContent: 'center', backgroundColor: '#d7dde5' },
+  neighborBlock: { position: 'absolute', left: 0, top: 0, width: '22%', height: '100%', backgroundColor: '#f0f2f5' },
+  streetBottom: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: '#b8bec7' },
+  streetRight: { position: 'absolute', right: 0, top: 0, bottom: 0, width: 34, alignItems: 'center', justifyContent: 'center', backgroundColor: '#b8bec7' },
   streetText: { color: c.gray, fontSize: 11, fontWeight: '900' },
-  streetTextVertical: { color: c.gray, fontSize: 11, fontWeight: '900', transform: [{ rotate: '-90deg' }], width: 118, textAlign: 'center' },
-  campusPark: { position: 'absolute', left: '34%', top: '30%', width: '28%', height: '28%', borderRadius: 999, alignItems: 'center', justifyContent: 'center', backgroundColor: '#dff4e8', borderWidth: 1, borderColor: '#bfe8d0' },
-  parkText: { color: c.green, fontSize: 13, fontWeight: '900' },
-  walkwayHorizontal: { position: 'absolute', left: '7%', right: '7%', top: '54%', height: 10, borderRadius: 999, backgroundColor: '#d9e1ea' },
-  walkwayVertical: { position: 'absolute', top: '9%', bottom: '9%', left: '50%', width: 10, borderRadius: 999, backgroundColor: '#d9e1ea' },
+  streetTextVertical: { color: c.text, fontSize: 14, fontWeight: '900', transform: [{ rotate: '-90deg' }], width: 150, textAlign: 'center' },
+  parkingZone: { position: 'absolute', right: '5%', top: '45%', width: '11%', height: '28%', alignItems: 'center', justifyContent: 'center', backgroundColor: '#eef0f3' },
+  parkingText: { color: '#a5acb8', fontSize: 44, fontWeight: '900' },
+  campusNode: { position: 'absolute', left: '65%', top: '49%', width: 28, height: 28, borderRadius: 99, backgroundColor: '#b8bec7' },
+  walkwayTop: { position: 'absolute', left: '31%', right: '14%', top: '27%', height: 8, borderRadius: 999, backgroundColor: '#b8bec7' },
+  walkwayMid: { position: 'absolute', left: '29%', right: '17%', top: '51%', height: 8, borderRadius: 999, backgroundColor: '#b8bec7', transform: [{ rotate: '9deg' }] },
+  walkwayBottom: { position: 'absolute', left: '10%', right: '5%', bottom: '12%', height: 8, borderRadius: 999, backgroundColor: '#b8bec7' },
+  walkwayVertical: { position: 'absolute', top: '17%', bottom: '12%', left: '69%', width: 8, borderRadius: 999, backgroundColor: '#b8bec7' },
+  audimaxLabel: { position: 'absolute', right: '17%', top: '42%', width: '17%', minHeight: 74, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: '#075b9f' },
+  languageLabel: { position: 'absolute', right: '16%', top: '20%', width: '28%', minHeight: 38, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: '#075b9f' },
+  tinyLabel: { color: '#fff', fontSize: 10, fontWeight: '900', textAlign: 'center' },
+  tinyStrong: { color: '#fff', fontSize: 21, fontWeight: '900', lineHeight: 23 },
+  tinySmall: { color: '#fff', fontSize: 9, fontWeight: '800' },
   mapBuilding: { position: 'absolute', borderRadius: 9, borderWidth: 1, borderColor: '#0a4f8a', alignItems: 'center', justifyContent: 'center', padding: 5, backgroundColor: '#075b9f', shadowColor: '#1b2a41', shadowOpacity: 0.08, shadowRadius: 14, elevation: 3 },
   mapBuildingFree: { borderColor: c.green, backgroundColor: c.green },
   mapBuildingShort: { color: '#fff', fontSize: 17, fontWeight: '900' },
   mapBuildingShortFree: { color: '#fff' },
   mapBuildingName: { marginTop: 2, color: '#e7f1fb', fontSize: 9, fontWeight: '800', textAlign: 'center' },
   mapBuildingNameFree: { color: '#fff' },
-  entrance: { position: 'absolute', right: -8, bottom: 10, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 4, backgroundColor: c.navy },
-  entranceText: { color: '#fff', fontSize: 10, fontWeight: '900' },
+  entrance: { position: 'absolute', right: -8, top: -8, width: 22, height: 22, borderRadius: 999, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#fff', backgroundColor: c.green },
+  entranceText: { color: '#fff', fontSize: 11, fontWeight: '900' },
   campusSummary: { marginTop: 16, borderRadius: 18, borderWidth: 1, borderColor: c.border, padding: 16, backgroundColor: c.card },
   mapButton: { position: 'absolute', right: 20, bottom: 22, height: 58, borderRadius: 19, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 18, backgroundColor: c.navy, elevation: 8 },
   mapButtonIcon: { color: '#fff', fontSize: 21, fontWeight: '900' },
