@@ -1,4 +1,5 @@
 import { AppPreview } from './components/AppPreview';
+import { DownloadPanel } from './components/DownloadPanel';
 import { Features } from './components/Features';
 import { Footer } from './components/Footer';
 import { Hero } from './components/Hero';
@@ -37,6 +38,7 @@ function App() {
           highlight
         />
       </Reveal>
+      <DownloadPanel />
       <Footer year={currentYear} />
     </main>
   );
