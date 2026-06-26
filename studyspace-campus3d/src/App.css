@@ -75,38 +75,22 @@ p {
   box-shadow: 0 12px 32px rgba(11, 31, 58, 0.1);
 }
 
-.legend i,
-.miniBadge {
+.legend i {
   width: 10px;
   height: 10px;
   border-radius: 999px;
 }
 
-.legend .free,
-.miniBadge.free {
+.legend .free {
   background: #19a66a;
 }
 
-.legend .medium,
-.miniBadge.medium {
+.legend .medium {
   background: #f4b740;
 }
 
-.legend .busy,
-.miniBadge.busy {
+.legend .busy {
   background: #d9534f;
-}
-
-.miniBadge {
-  display: inline-grid;
-  place-items: center;
-  min-width: 22px;
-  height: 22px;
-  color: #fff;
-  border: 2px solid #fff;
-  font-size: 11px;
-  font-weight: 950;
-  box-shadow: 0 8px 18px rgba(11, 31, 58, 0.18);
 }
 
 .hint {
@@ -191,15 +175,45 @@ p {
 .roomCard {
   padding: 14px;
   border: 1px solid #dfe7f2;
+  border-left: 6px solid #19a66a;
   border-radius: 16px;
   background: #f8fafc;
+}
+
+.roomTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .roomCard strong {
   display: block;
   color: #0b1f3a;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 950;
+}
+
+.roomStatus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 58px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.roomStatus.free {
+  background: #19a66a;
+}
+
+.roomStatus.busy {
+  background: #d9534f;
 }
 
 .roomCard span,
