@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import type { ComponentRef, MutableRefObject } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Text } from '@react-three/drei';
+import { ContactShadows, OrbitControls, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import './App.css';
 
@@ -194,6 +194,19 @@ const campusFootprints = [
 const loadColor: Record<LoadLevel, string> = { free: '#19a66a', medium: '#f4b740', busy: '#d9534f' };
 const loadLabel: Record<LoadLevel, string> = { free: 'Alle Räume frei', medium: 'Teilweise freie Räume', busy: 'Alle Räume belegt' };
 const roomColor: Record<RoomStatus, string> = { frei: '#19a66a', belegt: '#d9534f' };
+const buildingHeights: Record<string, number> = {
+  y1: 1.35,
+  y2: 0.85,
+  z: 1.55,
+  r: 1.15,
+  s: 0.95,
+  t: 1.25,
+  x: 0.8,
+  w: 1.45,
+  f: 1.05,
+  v1: 1.2,
+  v2: 0.9,
+};
 
 function getLoad(buildingRooms: Room[]): LoadLevel {
   if (buildingRooms.length === 0) return 'busy';
@@ -238,10 +251,19 @@ function App() {
           </div>
         </div>
 
-        <Canvas camera={{ position: [7.8, 7.4, 11.6], fov: 48 }} shadows>
-          <color attach="background" args={['#eef3f8']} />
-          <ambientLight intensity={0.74} />
-          <directionalLight position={[8, 12, 7]} intensity={1.35} castShadow />
+        <Canvas camera={{ position: [7.8, 7.4, 11.6], fov: 46 }} shadows dpr={[1, 1.75]}>
+          <color attach="background" args={['#e9f0f5']} />
+          <fog attach="fog" args={['#e9f0f5', 18, 34]} />
+          <ambientLight intensity={0.32} />
+          <hemisphereLight args={['#dcecff', '#71806c', 1.1]} />
+          <directionalLight
+            position={[-7, 12, 8]}
+            intensity={2.1}
+            castShadow
+            shadow-mapSize-width={2048}
+            shadow-mapSize-height={2048}
+            shadow-bias={-0.0004}
+          />
           <CampusScene buildings={buildings} selected={selected} onSelect={setSelected} />
         </Canvas>
 
@@ -298,9 +320,11 @@ function CampusScene({ buildings, selected, onSelect }: { buildings: Building[];
       <Ground />
       <Roads />
       <Parking />
+      <Landscaping />
       {buildings.map((building) => (
         <BuildingBlock key={building.id} building={building} selected={selected?.id === building.id} onSelect={onSelect} />
       ))}
+      <ContactShadows position={[0, 0.035, 0]} opacity={0.28} scale={20} blur={2.8} far={11} resolution={512} />
     </>
   );
 }
@@ -324,10 +348,16 @@ function CameraRig({ controls, target }: { controls: MutableRefObject<ControlsRe
 
 function Ground() {
   return (
-    <mesh rotation-x={-Math.PI / 2} receiveShadow>
-      <planeGeometry args={[18, 15]} />
-      <meshStandardMaterial color="#eef3f8" />
-    </mesh>
+    <group>
+      <mesh rotation-x={-Math.PI / 2} receiveShadow>
+        <planeGeometry args={[18, 15]} />
+        <meshStandardMaterial color="#dfe8dd" roughness={0.96} />
+      </mesh>
+      <mesh position={[0, 0.006, 0]} rotation-x={-Math.PI / 2} receiveShadow>
+        <planeGeometry args={[16.8, 13.8]} />
+        <meshStandardMaterial color="#edf1e9" roughness={0.92} />
+      </mesh>
+    </group>
   );
 }
 
@@ -362,6 +392,31 @@ function Roads() {
   );
 }
 
+function Landscaping() {
+  const trees = [
+    [-7.5, -3.7], [-6.4, -3.9], [-4.4, -4.4], [-3.7, -2.4], [-3.9, 0.2],
+    [-7.4, 1.2], [-5.1, 4.4], [-2.6, 4.6], [0.4, 4.2], [3.9, 4.5],
+    [5.0, 2.8], [6.8, 3.5], [6.8, -2.0], [4.9, -3.5], [0.2, -5.5],
+  ] as [number, number][];
+
+  return (
+    <group>
+      {trees.map(([x, z], index) => (
+        <group key={`${x}-${z}`} position={[x, 0, z]} scale={0.82 + (index % 3) * 0.08}>
+          <mesh position={[0, 0.24, 0]} castShadow>
+            <cylinderGeometry args={[0.055, 0.075, 0.48, 8]} />
+            <meshStandardMaterial color="#8a6a4d" roughness={0.95} />
+          </mesh>
+          <mesh position={[0, 0.62, 0]} castShadow>
+            <dodecahedronGeometry args={[0.3, 0]} />
+            <meshStandardMaterial color={index % 2 ? '#3f7657' : '#4f8662'} roughness={0.9} />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
+}
+
 function Parking() {
   return (
     <group position={[6.95, 0.045, 1.45]}>
@@ -379,33 +434,44 @@ function Parking() {
 function BuildingBlock({ building, selected, onSelect }: { building: Building; selected: boolean; onSelect: (building: Building) => void }) {
   const color = loadColor[building.load];
   const label = building.labelOffset ?? [0, 0, 0];
+  const height = buildingHeights[building.id] ?? 1;
 
   return (
-    <group position={building.position}>
+    <group position={[building.position[0], height / 2, building.position[2]]}>
       {building.footprint.map((part, index) => (
-        <mesh
-          key={index}
-          castShadow
-          position={[part.x, 0, part.z]}
-          rotation-y={part.rotation ?? 0}
-          onClick={(event) => {
-            event.stopPropagation();
-            onSelect(building);
-          }}
-          onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
-          onPointerOut={() => { document.body.style.cursor = 'default'; }}
-        >
-          <boxGeometry args={[part.width, 1, part.depth]} />
-          <meshStandardMaterial color={color} roughness={0.55} emissive={selected ? color : '#000000'} emissiveIntensity={selected ? 0.16 : 0} />
-        </mesh>
+        <group key={index} position={[part.x, 0, part.z]} rotation-y={part.rotation ?? 0}>
+          <mesh
+            castShadow
+            receiveShadow
+            onClick={(event) => {
+              event.stopPropagation();
+              onSelect(building);
+            }}
+            onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
+            onPointerOut={() => { document.body.style.cursor = 'default'; }}
+          >
+            <boxGeometry args={[part.width, height, part.depth]} />
+            <meshStandardMaterial color={selected ? '#ffffff' : '#f5f4ef'} roughness={0.7} metalness={0.02} />
+          </mesh>
+          <mesh position={[0, height / 2 + 0.045, 0]} castShadow>
+            <boxGeometry args={[part.width + 0.06, 0.09, part.depth + 0.06]} />
+            <meshStandardMaterial color={color} roughness={0.48} emissive={color} emissiveIntensity={selected ? 0.32 : 0.08} />
+          </mesh>
+          {part.width > 0.8 && (
+            <mesh position={[0, 0, part.depth / 2 + 0.006]}>
+              <planeGeometry args={[part.width * 0.62, Math.min(0.24, height * 0.22)]} />
+              <meshStandardMaterial color="#244158" roughness={0.38} metalness={0.12} />
+            </mesh>
+          )}
+        </group>
       ))}
       {selected && (
-        <mesh position={[0, -0.5, 0]} rotation-x={-Math.PI / 2}>
-          <ringGeometry args={[1.08, 1.25, 48]} />
-          <meshBasicMaterial color="#0b1f3a" />
+        <mesh position={[0, -height / 2 + 0.025, 0]} rotation-x={-Math.PI / 2}>
+          <ringGeometry args={[1.06, 1.28, 64]} />
+          <meshBasicMaterial color={color} transparent opacity={0.7} depthWrite={false} />
         </mesh>
       )}
-      <Text position={[label[0], 1.35 + label[1], label[2]]} fontSize={0.42} color="#0b1f3a" anchorX="center" anchorY="middle">
+      <Text position={[label[0], height / 2 + 0.48 + label[1], label[2]]} fontSize={0.4} color="#173047" anchorX="center" anchorY="middle" outlineWidth={0.018} outlineColor="#ffffff">
         {building.short}
       </Text>
     </group>
